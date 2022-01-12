@@ -11,3 +11,9 @@ Encoding: UTF-8
 
 RnwWeave: Sweave
 LaTeX: pdfLaTeX
+
+QuitChildProcessesOnExit: Yes
+
+PythonType: system
+PythonVersion: 3.9.5
+PythonPath: C:/Python39/python.exe

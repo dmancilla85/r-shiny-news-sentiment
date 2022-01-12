@@ -1,0 +1,13 @@
+name: news-sentiment
+title: news-sentiment
+username:
+account: el-jaguar
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 5427573
+bundleId: 5458596
+url: https://el-jaguar.shinyapps.io/news-sentiment/
+when: 1641956565.37191
+lastSyncTime: 1641956565.37191
+asMultiple: FALSE
+asStatic: FALSE

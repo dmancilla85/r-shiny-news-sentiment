@@ -2,7 +2,7 @@
 #'
 #' This function plots the sentiment analysis with NRC.
 #'
-plotSentiment <- function(df, title, subtitle, translator) {
+plotSentiment <- function(df_news, title, subtitle, translator) {
   caption <- ""
 
   custom_theme <- ggplot2::theme(
@@ -15,10 +15,17 @@ plotSentiment <- function(df, title, subtitle, translator) {
     axis.title = ggplot2::element_text(size = 14, color = "darkcyan", face = "italic"),
     panel.grid = ggplot2::element_blank()
   )
-
+  
+  # Check encoding in columns
+  Encoding(df_news[["title"]]) <- "UTF-8"
+  Encoding(df_news[["description"]]) <- "UTF-8"
+  Encoding(df_news[["content"]]) <- "UTF-8"
+  
+  print(df_news)
+  
   nrc <-
     tidyr::pivot_longer(
-      df,
+      df_news,
       cols = c(
         "anger",
         "anticipation",
@@ -31,9 +38,13 @@ plotSentiment <- function(df, title, subtitle, translator) {
         "negative",
         "positive"
       ),
-      names_to = "Sentimiento"
+      names_to = "Sentimiento",
+      names_repair = "unique"
     ) %>% dplyr::filter(!(Sentimiento %in% c("positive", "negative", "trust")))
-  nrc
+  
+  print("pito")
+  print(nrc)
+  
   nrc[nrc$Sentimiento == "anger", ]$Sentimiento <- translator$t("Anger")
   nrc[nrc$Sentimiento == "anticipation", ]$Sentimiento <- translator$t("Anticipation")
   nrc[nrc$Sentimiento == "disgust", ]$Sentimiento <- translator$t("Disgust")

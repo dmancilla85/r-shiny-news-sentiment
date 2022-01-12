@@ -87,9 +87,7 @@
         "from=${obj$from}&to=${obj$to}&wt=json"
       )
     )
-
-    print(query)
-
+    
     return(query)
   }
 
@@ -107,8 +105,6 @@
         "from=${obj$from}&to=${obj$to}&wt=json"
       )
     )
-
-    print(query)
 
     return(query)
   }
@@ -139,7 +135,6 @@
       )
     }
 
-    print(query)
     return(query)
   }
 
@@ -266,7 +261,6 @@
   #'
   getEverythingPerPage <- function(obj,
                                    currentPage = 1) {
-    print(obj)
 
     if (isTRUE(obj$searchInTitles)) {
       promise <- future::future(
@@ -291,8 +285,6 @@
     }
 
     cadena <- stringr::str_replace_all(urltools::url_decode(obj$query), '\"', "")
-
-    print(cadena)
 
     if (obj$searchInTitles) {
       df_response <- df_response %>%

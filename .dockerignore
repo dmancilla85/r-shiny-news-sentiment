@@ -1,0 +1,7 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.Renviron
+buid_and_run_docker.ps1
+Dockerfile

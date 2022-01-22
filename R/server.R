@@ -1,7 +1,6 @@
 
 # Define server logic
 server <- function(input, output, session) {
-  
   observeEvent(input$sel_language, {
     shiny.i18n::update_lang(session, input$sel_language)
   })
@@ -23,8 +22,6 @@ server <- function(input, output, session) {
   # TODO: revisar validez del analisis de sentimiento
   values <- shiny::reactiveValues()
   values$is_empty <- TRUE
-
-  getAvailableCountries()
 
   shiny::observeEvent(input$btn_start, {
     values$date_range <- shiny::isolate(input$dt_fechas)
@@ -53,7 +50,7 @@ server <- function(input, output, session) {
         p_category = values$category,
         p_searchInTitles = values$titles
       )
-      
+
       values$df_req <- getNews(newsApi)
 
       if (is.null(values$df_req) || nrow(values$df_req) == 0) {
@@ -83,19 +80,23 @@ server <- function(input, output, session) {
       ggplot2::ggplot() +
         ggplot2::geom_blank()
     } else {
+      nrc <- processWithNRC(values$df_req, values$lang)
+      plotSentiment(plot_data = nrc, plot_title = title, plot_subtitle = subtitle, translator = i18n)
+    }
+  })
+
+  output$plt_media <- shiny::renderPlot({
+    title <- stringr::str_to_title(
+      stringr::str_interp("${i18n$t('Sources contribution')}")
+    )
+
+    if (values$is_empty) {
+      ggplot2::ggplot() +
+        ggplot2::geom_blank()
+    } else {
       # show plot
-
-      tryCatch(
-        expr = nrc <- processWithNRC(values$df_req, values$lang), error = function(cond) {
-          message("Here's the original error message:")
-          message(cond)
-        },
-        warning = function(cond) {
-          message(cond)
-        }
-      )
-
-      plotSentiment(nrc, title = title, subtitle = subtitle, translator = i18n)
+      nrc <- processWithNRC(values$df_req, values$lang)
+      plotSourcesContribution(plot_data = nrc)
     }
   })
 

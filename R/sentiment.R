@@ -34,13 +34,17 @@ supported_langs <- c(
 getCorpus <- function(text_v, language) {
   txt_new_corpus <- tm::Corpus(tm::VectorSource(text_v))
   toSpace <- tm::content_transformer(function(x, pattern) gsub(pattern, " ", x))
-  
+
   # clean and tidy
   txt_new_corpus <- tm::tm_map(txt_new_corpus, toSpace, "/")
   txt_new_corpus <- tm::tm_map(txt_new_corpus, toSpace, "\n")
   txt_new_corpus <- tm::tm_map(txt_new_corpus, toSpace, "\r")
   txt_new_corpus <- tm::tm_map(txt_new_corpus, toSpace, "@")
   txt_new_corpus <- tm::tm_map(txt_new_corpus, toSpace, "\\|")
+  txt_new_corpus <- tm::tm_map(txt_new_corpus, toSpace, "‘")
+  txt_new_corpus <- tm::tm_map(txt_new_corpus, toSpace, "“")
+  txt_new_corpus <- tm::tm_map(txt_new_corpus, toSpace, "”")
+  txt_new_corpus <- tm::tm_map(txt_new_corpus, toSpace, "’")
   # Convert the text to lower case
   txt_new_corpus <- tm::tm_map(txt_new_corpus, tm::content_transformer(tolower))
   # Remove numbers
@@ -62,22 +66,34 @@ getCorpus <- function(text_v, language) {
 processWithNRC <- function(df, lang = "es", target = "content") {
   df$id <- (1:nrow(df))
 
-  language <- supported_langs[lang]
+  language_code <- supported_langs[lang]
+
+  Encoding(df$title) <- "UTF-8"
+  Encoding(df$description) <- "UTF-8"
+  Encoding(df$url) <- "UTF-8"
+  Encoding(df$urlToImage) <- "UTF-8"
+  Encoding(df$content) <- "UTF-8"
+  Encoding(df$source.name) <- "UTF-8"
 
   df <- df %>% dplyr::mutate(content = stringr::str_replace(content, "/", " "))
   df <- df %>% dplyr::mutate(content = stringr::str_replace(content, "\n", " "))
   df <- df %>% dplyr::mutate(content = stringr::str_replace(content, "\r", " "))
   df <- df %>% dplyr::mutate(content = stringr::str_replace(content, "@", " "))
   df <- df %>% dplyr::mutate(content = stringr::str_replace(content, "\\|", " "))
-  df <- df %>% dplyr::mutate(content = stringr::str_replace(content, "...", " "))
-  df$content <- gsub('[0-9.]', '', df$content)
+  df <- df %>% dplyr::mutate(content = stringr::str_replace(content, "‘", " "))
+  df <- df %>% dplyr::mutate(content = stringr::str_replace(content, "“", " "))
+  df <- df %>% dplyr::mutate(content = stringr::str_replace(content, "”", " "))
+  df <- df %>% dplyr::mutate(content = stringr::str_replace(content, "’", " "))
+
+  df$content <- gsub("[0-9.]", "", df$content)
 
   # Collect all descriptions
   for (i in 1:nrow(df)) {
-    char_v <- syuzhet::get_sentences(df[i, target], fix_curly_quotes = TRUE)
+    sentence_v <- df[i, target]
+    char_v <- syuzhet::get_sentences(sentence_v, fix_curly_quotes = TRUE)
 
     if (i == 1) {
-      nrc_data <- syuzhet::get_nrc_sentiment(char_v, language = language)
+      nrc_data <- syuzhet::get_nrc_sentiment(char_v, language = language_code)
       nrc_sum <- colSums(nrc_data)
       nrc_sum <- append(nrc_sum, i)
       names(nrc_sum) <- c(
@@ -86,7 +102,7 @@ processWithNRC <- function(df, lang = "es", target = "content") {
         "positive", "id"
       )
     } else {
-      aux_data <- syuzhet::get_nrc_sentiment(char_v, language = language)
+      aux_data <- syuzhet::get_nrc_sentiment(char_v, language = language_code)
       aux_sum <- colSums(aux_data)
       aux_sum <- append(aux_sum, i)
       names(aux_sum) <- c(

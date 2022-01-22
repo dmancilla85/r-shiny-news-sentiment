@@ -1,30 +1,8 @@
 
-#' Get available countries
-#'
-#' Return the list of countries
-#'
-getAvailableCountries <- function() {
-  countries <- read.table("./data/countries",
-    header = TRUE,
-    sep = ",", encoding = "UTF-8"
-  )
-  api_countries <- read.table("./data/api_countries",
-    header = TRUE,
-    sep = ",", encoding = "UTF-8"
-  )
-  countries$Code <- tolower(countries$Code)
-
-  filtered <- countries %>%
-    dplyr::inner_join(api_countries, by = "Code")
-
-  countries <- filtered$Code
-  names(countries) <- filtered$Name
-  return(countries)
-}
-
-mySidebarPanel <- # Sidebar with a slider input for number of bins
-  function() {
-    shinydashboard::dashboardSidebar( collapsed = FALSE,
+showSidebar <- # Sidebar with a slider input for number of bins
+  function(i18n) {
+    shinydashboard::dashboardSidebar(
+      collapsed = FALSE,
       shiny::selectInput(
         inputId = "sel_language",
         label = i18n$t("Language"),
@@ -41,7 +19,7 @@ mySidebarPanel <- # Sidebar with a slider input for number of bins
           "Dutch" = "nl"
         ),
       ),
-      checkboxInput(
+      shiny::checkboxInput(
         inputId = "chk_latest_news", label = i18n$t("Top headlines"),
         value = TRUE
       ),
@@ -51,7 +29,7 @@ mySidebarPanel <- # Sidebar with a slider input for number of bins
           inputId = "sel_country",
           label = i18n$t("Country"),
           selected = "us",
-          choices = getAvailableCountries()
+          choices = dataModule$getAvailableCountries()
         ),
         shiny::selectInput(
           inputId = "sel_category",
@@ -85,8 +63,8 @@ mySidebarPanel <- # Sidebar with a slider input for number of bins
         value = NULL,
         placeholder = ""
       ),
-      shiny::actionButton(inputId = "btn_start", label = i18n$t("Search"),icon = icon("search"))
-      ,shiny::conditionalPanel(
+      shiny::actionButton(inputId = "btn_start", label = i18n$t("Search"), icon = icon("search")),
+      shiny::conditionalPanel(
         condition = "$('html').hasClass('shiny-busy')",
         htmltools::tags$div(i18n$t("Loading..."), id = "loadmessage")
       )

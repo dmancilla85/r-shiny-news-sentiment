@@ -21,10 +21,10 @@ loadAllLibraries <- function() {
     library(shinydashboardPlus)
   }
   
-#  if (!require(shinybusy)) {
-#    install.packages("shinybusy")
-#    library(shinybusy)
-#  }
+  #if (!require(ggrepel)) {
+  #  install.packages("ggrepel")
+  #  library(ggrepel)
+  #}
 
   if (!require(tm)) {
     install.packages("tm")

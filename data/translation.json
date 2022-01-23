@@ -287,7 +287,7 @@
 		  "no": "<pendiente>"
 		},
 		{
-			"en": "NRC Sentiment Analysis (Emotion-Lexicon)",
+			"en": "NRC Sentiment Analysis (EmoLex)",
 			"ar": "تحليل المشاعر NRC (العاطفة - المعجم)",
 			"de": "NRC-Stimmungsanalyse (Emotion - Lexikon)",
 			"es": "Análisis de Sentimiento NRC (Emoción - Lexicon)",
@@ -436,6 +436,39 @@
 			"es": "Sentimiento",
 			"fr": "Sentiment",
 			"pt": "Sentimento",
+			"it": "<pendiente>",
+		  "nl": "<pendiente>",
+		  "no": "<pendiente>"
+		},
+		{
+			"en": "Trust",
+			"ar": "إحساس",
+			"de": "Trust",
+			"es": "Confianza",
+			"fr": "Trust",
+			"pt": "Confianza",
+			"it": "<pendiente>",
+		  "nl": "<pendiente>",
+		  "no": "<pendiente>"
+		},
+		{
+			"en": "Positive",
+			"ar": "إحساس",
+			"de": "Trust",
+			"es": "Confianza",
+			"fr": "Trust",
+			"pt": "Confianza",
+			"it": "<pendiente>",
+		  "nl": "<pendiente>",
+		  "no": "<pendiente>"
+		},
+		{
+			"en": "Negative",
+			"ar": "إحساس",
+			"de": "Trust",
+			"es": "Confianza",
+			"fr": "Trust",
+			"pt": "Confianza",
 			"it": "<pendiente>",
 		  "nl": "<pendiente>",
 		  "no": "<pendiente>"

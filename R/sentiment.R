@@ -64,10 +64,13 @@ getCorpus <- function(text_v, language) {
 #' This function analyzes the news dataframe with the NRC method.
 #'
 processWithNRC <- function(df, lang = "es", target = "content") {
+  if (nrow(df) == 0) {
+    return(NULL)
+  }
+
   df$id <- (1:nrow(df))
 
   language_code <- supported_langs[lang]
-
   Encoding(df$title) <- "UTF-8"
   Encoding(df$description) <- "UTF-8"
   Encoding(df$url) <- "UTF-8"
@@ -84,6 +87,7 @@ processWithNRC <- function(df, lang = "es", target = "content") {
   df <- df %>% dplyr::mutate(content = stringr::str_replace(content, "“", " "))
   df <- df %>% dplyr::mutate(content = stringr::str_replace(content, "”", " "))
   df <- df %>% dplyr::mutate(content = stringr::str_replace(content, "’", " "))
+
 
   df$content <- gsub("[0-9.]", "", df$content)
 

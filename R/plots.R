@@ -1,19 +1,26 @@
+
+#' Customized palettes'
+dry_rosewood <- c("#745250", "#9a5e5c", "#e7cabf", "#d98288", "#e9a093")
+
 #' Plot NRC results
 #'
 #' This function plots the sentiment analysis with NRC.
 #'
-plotSentiment <- function(plot_data, plot_title, plot_subtitle, translator) {
+plotEmolex <- function(plot_data, plot_title, plot_subtitle, translator) {
   caption <- ""
 
   custom_theme <- ggplot2::theme(
+    legend.position = "none",
+    panel.grid = ggplot2::element_blank(),
     strip.background = ggplot2::element_blank(),
+    plot.title = ggplot2::element_text(size = 15, hjust = 0.5),
+    plot.subtitle = ggplot2::element_text(size = 13, color = "darkcyan", hjust = 0.5),
     panel.border = ggplot2::element_rect(fill = NA, color = "white"),
     panel.grid.minor = ggplot2::element_blank(),
-    plot.title = ggplot2::element_text(size = 16),
-    plot.subtitle = ggplot2::element_text(size = 14, color = "darkcyan"),
-    axis.text = ggplot2::element_text(size = 12),
-    axis.title = ggplot2::element_text(size = 14, color = "darkcyan", face = "italic"),
-    panel.grid = ggplot2::element_blank()
+    panel.grid.major = ggplot2::element_blank(),
+    axis.text = ggplot2::element_blank(),
+    axis.title = ggplot2::element_blank(),
+    axis.ticks = ggplot2::element_blank()
   )
 
 
@@ -43,7 +50,7 @@ plotSentiment <- function(plot_data, plot_title, plot_subtitle, translator) {
       names_to = "Sentimiento",
       names_repair = "unique"
     ) %>%
-    dplyr::filter(!(Sentimiento %in% c("positive", "negative", "trust")))
+    dplyr::filter(!(Sentimiento %in% c("positive", "negative")))
 
   nrc[nrc$Sentimiento == "anger", ]$Sentimiento <- translator$t("Anger")
   nrc[nrc$Sentimiento == "anticipation", ]$Sentimiento <- translator$t("Anticipation")
@@ -52,8 +59,9 @@ plotSentiment <- function(plot_data, plot_title, plot_subtitle, translator) {
   nrc[nrc$Sentimiento == "joy", ]$Sentimiento <- translator$t("Joy")
   nrc[nrc$Sentimiento == "sadness", ]$Sentimiento <- translator$t("Sadness")
   nrc[nrc$Sentimiento == "surprise", ]$Sentimiento <- translator$t("Surprise")
+  nrc[nrc$Sentimiento == "trust", ]$Sentimiento <- translator$t("Trust")
 
-  
+
   data <- nrc %>%
     dplyr::select(Sentimiento, value) %>%
     dplyr::filter(value != 0) %>%
@@ -61,95 +69,151 @@ plotSentiment <- function(plot_data, plot_title, plot_subtitle, translator) {
     dplyr::summarise(valencia = sum(value))
 
   data$fraction <- data$valencia / sum(data$valencia)
-  
+
   # Compute the cumulative percentages (top of each rectangle)
   data$ymax <- cumsum(data$fraction)
-  
+
   # Compute the bottom of each rectangle
   data$ymin <- c(0, head(data$ymax, n = -1))
-  
+
   # Compute label position
   data$labelPosition <- (data$ymax + data$ymin) / 2
-  
-  # Compute a good label
-  data$label <- paste0(data$Sentimiento, "\n",format(round(data$fraction*100, 2), nsmall = 2),"%")
-  
-  # Make the plot
-  plot <- ggplot(data, aes(ymax=ymax, ymin=ymin, xmax=4, xmin=3, fill=Sentimiento)) +
-    geom_rect() +
-    geom_text( x=2, aes(y=labelPosition, label=label, color="black"), size=5) + 
-    # x here controls label position (inner / outer)
-    #scale_fill_brewer(palette=3) +
-    scale_color_brewer(palette=3) +
-    coord_polar(theta="y") +
-    xlim(c(-1, 4)) +
-    theme_void() +
-    theme(legend.position = "none")
-  
-  
-  #custom_breaks <- unique(sort(nrc$valencia))
 
-  #plot <- nrc %>% ggplot2::ggplot(ggplot2::aes(
-  #  x = Sentimiento, y = valencia, fill = Sentimiento # , fill = source.name
-  #)) +
-  #  ggplot2::geom_bar(stat = "identity") +
-  #  ggplot2::ggtitle(plot_title, plot_subtitle) +
-  #  ggplot2::labs(caption = caption) +
-  #  ggplot2::coord_flip() +
-  #  ggplot2::xlab(translator$t("Sentiment")) +
-  #  ggplot2::ylab(translator$t("NRC EmoLex Score")) +
-  #  ggplot2::theme_gray() +
-  #  custom_theme +
-  #  ggplot2::scale_y_continuous(breaks = custom_breaks, limits = c(0, max(custom_breaks))) +
-  #  ggplot2::guides(fill = "none") +
-  #  ggplot2::scale_color_brewer()
+  # Compute a good label
+  data$label <- paste0(data$Sentimiento, "\n", format(round(data$fraction * 100, 2), nsmall = 2), "%")
+
+  # Make the plot
+  plot <- ggplot2::ggplot(data, ggplot2::aes(
+    ymax = ymax, ymin = ymin, xmax = 4, xmin = 3,
+    fill = Sentimiento
+  )) +
+    ggplot2::geom_rect(color = "whitesmoke") +
+    ggplot2::ggtitle(plot_title, plot_subtitle) +
+    ggplot2::geom_text(x = 2, ggplot2::aes(y = labelPosition, label = label), size = 4) +
+    # x here controls label position (inner / outer)
+    ggplot2::scale_fill_brewer(palette = 3) +
+    ggplot2::scale_color_brewer(palette = 3) +
+    ggplot2::coord_polar(theta = "y") +
+    ggplot2::xlim(c(-1, 4)) +
+    custom_theme
 
   return(plot)
 }
 
-plotSourcesContribution <- function(plot_data) {
+plotSources <- function(plot_data) {
   sources <- plot_data %>%
     dplyr::select(
       source.name
     )
 
+  custom_theme <- ggplot2::theme(
+    legend.position = "none",
+    plot.title = ggplot2::element_text(size = 15, hjust = 0.5),
+    plot.subtitle = ggplot2::element_text(size = 13, color = "darkcyan", hjust = 0.5),
+    axis.title.x = ggplot2::element_blank(),
+    axis.title.y = ggplot2::element_blank(),
+    axis.ticks = ggplot2::element_blank(),
+    panel.background = element_blank()
+  )
+
   data <- sources %>% count(source.name, name = "count")
+  data$source.name <- as.factor(data$source.name)
+  # count the needed levels of a factor
+  number <- nlevels(data$source.name)
+
+  # repeat the given colors enough times
+  rose_palette <- rep(dry_rosewood, length.out = number)
 
 
-  # Create test data.
-  # data <- data.frame(
-  #  category=c("A", "B", "C"),
-  #  count=c(10, 60, 30)
-  # )
+  title <- stringr::str_to_title("Sources Contributing")
+  subtitle <- "Number of articles provided by each media"
 
-  # Compute percentages
-  data$fraction <- data$count / sum(data$count)
+  plot <- data %>% ggplot2::ggplot(ggplot2::aes(x = source.name, y = count, fill = source.name)) +
+    ggplot2::geom_bar(stat = "identity") +
+    ggplot2::scale_fill_manual(values = rose_palette) +
+    ggplot2::scale_y_continuous(
+      labels = scales::label_number(accuracy = 1),
+      breaks = seq(from = 0, to = max(data$count), by = 1)
+    ) +
+    ggplot2::coord_flip() +
+    ggplot2::ggtitle(title, subtitle = subtitle) +
+    custom_theme
 
-  # Compute the cumulative percentages (top of each rectangle)
-  data$ymax <- cumsum(data$fraction)
+  return(plot)
+}
 
-  # Compute the bottom of each rectangle
-  data$ymin <- c(0, head(data$ymax, n = -1))
-
-  # Compute label position
-  data$labelPosition <- (data$ymax + data$ymin) / 2
-
-  # Compute a good label
-  data$label <- paste0(data$source.name, "\n value: ", data$count)
-
-  # Make the plot
-  plot <- ggplot(data, aes(ymax = ymax, ymin = ymin, xmax = 4, xmin = 3, fill = source.name)) +
-    geom_rect() +
-    geom_text(x = 2, aes(y = labelPosition, label = label, color = "darkgrey"), size =4) +
-    # x here controls label position (inner / outer)
-    #scale_fill_brewer(palette = "Set3") +
-    scale_color_brewer(palette = "Set3") +
-    coord_polar(theta = "y") +
-    xlim(c(-1, 4)) +
-    theme_void() +
-    theme(legend.position = "none")
+#' Plot sentiment results
+#'
+#' This function plots the sentiment analysis with NRC.
+#'
+plotSentiment <- function(plot_data, translator) {
   
+  title <- "Sentiment Found"
+  subtitle <- "Summary of all the words analyzed"
+  
+  custom_theme <- ggplot2::theme(
+    axis.title.x = ggplot2::element_blank(),
+    axis.ticks.x = ggplot2::element_blank(),
+    axis.title.y = ggplot2::element_blank(),
+    axis.ticks.y = ggplot2::element_blank(),
+    axis.text.x = ggplot2::element_blank(),
+    axis.text.y = ggplot2::element_blank(),
+    strip.background = ggplot2::element_blank(),
+    panel.grid.minor = ggplot2::element_blank(),
+    panel.grid.major = ggplot2::element_blank(),
+    legend.position = "none",
+    plot.title = ggplot2::element_text(size = 15, hjust = 0.5),
+    plot.subtitle = ggplot2::element_text(size = 13, color = "darkcyan", hjust = 0.5)
+  )
 
+  nrc <- plot_data %>%
+    dplyr::select(
+      -title,
+      -description,
+      -content,
+      -url,
+      -urlToImage,
+      -source.name,
+      -publishedAt
+    ) %>%
+    tidyr::pivot_longer(
+      cols = c(
+        "anger",
+        "anticipation",
+        "disgust",
+        "fear",
+        "joy",
+        "sadness",
+        "surprise",
+        "trust",
+        "negative",
+        "positive"
+      ),
+      names_to = "Sentiment",
+      names_repair = "unique"
+    ) %>%
+    dplyr::filter(Sentiment %in% c("positive", "negative"))
+
+  nrc[nrc$Sentiment == "positive", ]$Sentiment <- translator$t("Positive")
+  nrc[nrc$Sentiment == "negative", ]$Sentiment <- translator$t("Negative")
+
+  data <- nrc %>%
+    dplyr::select(Sentiment, value) %>%
+    dplyr::filter(value != 0) %>%
+    dplyr::group_by(Sentiment) %>%
+    dplyr::summarise(valencia = sum(value))
+
+
+  data$percent <- data$valencia / sum(data$valencia)
+  data$label <- paste0(data$Sentiment,": ",format(round(data$percent * 100, 2), nsmall = 2), "%")
+
+  plot <- data %>% ggplot2::ggplot(aes(x=1,y = valencia, fill = Sentiment)) +
+    ggplot2::geom_bar(stat = "identity", width = 1) +
+    ggplot2::ggtitle(title, subtitle = subtitle)+
+    ggplot2::scale_fill_manual(values = c("tomato1", "springgreen2")) +
+    ggplot2::geom_text(aes(label = label, y = valencia), position = "stack") +
+    ggplot2::theme_minimal() +
+    custom_theme
 
   return(plot)
 }

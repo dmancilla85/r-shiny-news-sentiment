@@ -15,11 +15,15 @@ ui <- dashboardPage(
     # Show a plot of the generated distribution
     fluidRow(
       shinydashboard::box(
-        width = 6,
+        width = 5,
+        shinycustomloader::withLoader(plotOutput(outputId = "plt_emotion"))
+      ),
+      shinydashboard::box(
+        width = 3,
         shinycustomloader::withLoader(plotOutput(outputId = "plt_sentiment"))
       ),
       shinydashboard::box(
-        width = 6,
+        width = 4,
         shinycustomloader::withLoader(plotOutput(outputId = "plt_media"))
       ),
       shinydashboard::box(

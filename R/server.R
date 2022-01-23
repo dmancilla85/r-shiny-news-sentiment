@@ -52,7 +52,7 @@ server <- function(input, output, session) {
       )
 
       values$df_req <- getNews(newsApi)
-
+      
       if (is.null(values$df_req) || nrow(values$df_req) == 0) {
         values$is_empty <- TRUE
         empty_msg <- i18n$t("No results")
@@ -65,42 +65,51 @@ server <- function(input, output, session) {
         ))
       } else {
         values$is_empty <- FALSE
+        # analyze the values
+        values$nrc <- processWithNRC(values$df_req, values$lang)
       }
     }
+    
   })
 
-  output$plt_sentiment <- shiny::renderPlot({
+  output$plt_emotion <- shiny::renderPlot({
     title <- stringr::str_to_title(
-      stringr::str_interp("${i18n$t('Searched word')}: ${values$caption_txt}")
+      stringr::str_interp("Emotion on news mentioning '${values$caption_txt}'")
     )
 
-    subtitle <- i18n$t("NRC Sentiment Analysis (Emotion-Lexicon)")
+    subtitle <- i18n$t("NRC Sentiment Analysis (EmoLex)")
 
     if (values$is_empty) {
       ggplot2::ggplot() +
         ggplot2::geom_blank()
     } else {
-      nrc <- processWithNRC(values$df_req, values$lang)
-      plotSentiment(plot_data = nrc, plot_title = title, plot_subtitle = subtitle, translator = i18n)
+      plotEmolex(plot_data = values$nrc, plot_title = title, plot_subtitle = subtitle, translator = i18n)
     }
   })
 
   output$plt_media <- shiny::renderPlot({
-    title <- stringr::str_to_title(
-      stringr::str_interp("${i18n$t('Sources contribution')}")
-    )
-
+    
     if (values$is_empty) {
       ggplot2::ggplot() +
         ggplot2::geom_blank()
     } else {
       # show plot
-      nrc <- processWithNRC(values$df_req, values$lang)
-      plotSourcesContribution(plot_data = nrc)
+      plotSources(plot_data = values$nrc)
+    }
+  })
+  
+  output$plt_sentiment <- shiny::renderPlot({
+    
+    if (values$is_empty) {
+      ggplot2::ggplot() +
+        ggplot2::geom_blank()
+    } else {
+      # show plot
+      plotSentiment(plot_data = values$nrc, translator=i18n)
     }
   })
 
-  output$tbl_sentiment <- renderNewsTable(values, df_formatted)
+  output$tbl_sentiment <- renderNewsTable(values)
 
   output$txt_caption <- shiny::renderUI({
     htmltools::HTML("<p>Sentiment Analisys by David A. Mancilla. 2021</p>")

@@ -147,12 +147,21 @@
     print(paste("Call:", err$call))
   }
 
+  nullToNA <- function(x) {
+    x[sapply(x, is.null)] <- ""
+    return(x)
+  }
+  
 
   #' Converts the JSON response to a dataframe
   #'
   #' This function converts the JSON response to a single dataframe.
   #'
   convertFromJSON <- function(request) {
+  
+    
+    request$articles <- lapply(request$articles, nullToNA)
+    
     json_top <- jsonlite::toJSON(
       request$articles,
       Date = "ISO8601",
@@ -377,7 +386,6 @@
       }
 
       cadena <- stringr::str_replace_all(urltools::url_decode(obj$query), '\"', "")
-
       if (obj$searchInTitles) {
         df_response <- df_response %>%
           dplyr::filter(stringr::str_detect(toupper(title), toupper(cadena)))
@@ -386,7 +394,6 @@
           dplyr::filter(stringr::str_detect(toupper(title), toupper(cadena)) |
             stringr::str_detect(toupper(description), toupper(cadena)))
       }
-
       return(df_response)
     }
 

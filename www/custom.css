@@ -33,6 +33,10 @@ a img {
   z-index: 105;
 }
 
+div .content-wrapper{
+  background-color: #C0C0C0;
+}
+
 .main-header .logo {
   font-family: "Merienda", cursive;
 }

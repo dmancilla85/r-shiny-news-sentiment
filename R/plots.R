@@ -147,10 +147,9 @@ plotSources <- function(plot_data) {
 #' This function plots the sentiment analysis with NRC.
 #'
 plotSentiment <- function(plot_data, translator) {
-  
   title <- "Sentiment Found"
   subtitle <- "Summary of all the words analyzed"
-  
+
   custom_theme <- ggplot2::theme(
     axis.title.x = ggplot2::element_blank(),
     axis.ticks.x = ggplot2::element_blank(),
@@ -205,11 +204,11 @@ plotSentiment <- function(plot_data, translator) {
 
 
   data$percent <- data$valencia / sum(data$valencia)
-  data$label <- paste0(data$Sentiment,": ",format(round(data$percent * 100, 2), nsmall = 2), "%")
+  data$label <- paste0(data$Sentiment, ": ", format(round(data$percent * 100, 2), nsmall = 2), "%")
 
-  plot <- data %>% ggplot2::ggplot(aes(x=1,y = valencia, fill = Sentiment)) +
-    ggplot2::geom_bar(stat = "identity", width = 1) +
-    ggplot2::ggtitle(title, subtitle = subtitle)+
+  plot <- data %>% ggplot2::ggplot(aes(x = 1, y = valencia, fill = Sentiment)) +
+    ggplot2::geom_bar(stat = "identity") +
+    ggplot2::ggtitle(title, subtitle = subtitle) +
     ggplot2::scale_fill_manual(values = c("tomato1", "springgreen2")) +
     ggplot2::geom_text(aes(label = label, y = valencia), position = "stack") +
     ggplot2::theme_minimal() +

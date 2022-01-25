@@ -35,7 +35,7 @@ server <- function(input, output, session) {
 
 
     if (!is.null(values$date_range) &
-      (!is.null(values$caption_txt) & stringr::str_length(values$caption_txt) > 3)) {
+      (!is.null(values$caption_txt) & stringr::str_length(values$caption_txt) >= 3)) {
       newsApi <- NewsApi(
         # Language
         p_from = values$date_range[1],

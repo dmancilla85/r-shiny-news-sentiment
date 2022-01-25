@@ -11,6 +11,7 @@ ui <- dashboardPage(
       htmltools::tags$link(rel = "preconnect", href = "https://fonts.gstatic.com"),
       htmltools::tags$link(rel = "stylesheet", href = "https://fonts.googleapis.com/css2?family=Merienda&display=swap"),
       htmltools::tags$link(rel = "stylesheet", type = "text/css", href = "custom.css"),
+      htmltools::tags$meta(name = "description", content = "App to analize emotion and sentiment on news content, using the NRC EmoLex.")
     ),
     # Tooltips
     shinyBS::bsTooltip("sel_language", "Language of the news",

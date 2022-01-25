@@ -89,7 +89,7 @@ plotEmolex <- function(plot_data, plot_title, plot_subtitle, translator) {
   )) +
     ggplot2::geom_rect(color = "whitesmoke") +
     ggplot2::ggtitle(plot_title, plot_subtitle) +
-    ggplot2::geom_text(x = 2, ggplot2::aes(y = labelPosition, label = label), size = 4) +
+    ggrepel::geom_text_repel(x = 2, ggplot2::aes(y = labelPosition, label = label), size = 4) +
     # x here controls label position (inner / outer)
     ggplot2::scale_fill_brewer(palette = 3) +
     ggplot2::scale_color_brewer(palette = 3) +
@@ -128,12 +128,22 @@ plotSources <- function(plot_data) {
   title <- stringr::str_to_title("Sources Contributing")
   subtitle <- "Number of articles provided by each media"
 
+  by_ticks <- 3
+
+  if (max(data$count == 1)) {
+    by_ticks <- 1
+  }
+
+  if (max(data$count) %% 2 == 0) {
+    by_ticks <- 2
+  }
+
   plot <- data %>% ggplot2::ggplot(ggplot2::aes(x = source.name, y = count, fill = source.name)) +
     ggplot2::geom_bar(stat = "identity") +
     ggplot2::scale_fill_manual(values = rose_palette) +
     ggplot2::scale_y_continuous(
       labels = scales::label_number(accuracy = 1),
-      breaks = seq(from = 0, to = max(data$count), by = 1)
+      breaks = seq(from = 0, to = max(data$count), by =by_ticks)
     ) +
     ggplot2::coord_flip() +
     ggplot2::ggtitle(title, subtitle = subtitle) +

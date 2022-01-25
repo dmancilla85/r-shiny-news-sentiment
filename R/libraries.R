@@ -25,6 +25,11 @@ loadAllLibraries <- function() {
     install.packages("shinyBS")
     library(shinyBS)
   }
+  
+  if (!require(ggrepel)) {
+    install.packages("ggrepel")
+    library(ggrepel)
+  }
 
   if (!require(tm)) {
     install.packages("tm")

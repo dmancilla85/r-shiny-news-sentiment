@@ -1,6 +1,18 @@
 
 # Define server logic
 server <- function(input, output, session) {
+
+  # show modal
+  showModal(modalDialog(
+    easyClose = T,
+    h2("Welcome to Sentiment on News"),
+    "Choose the language, country, write a keyword and then click on the Search button"
+  ))
+
+  observeEvent(input$close_modal, {
+    removeModal()
+  })
+
   observeEvent(input$sel_language, {
     shiny.i18n::update_lang(session, input$sel_language)
   })
@@ -52,7 +64,7 @@ server <- function(input, output, session) {
       )
 
       values$df_req <- getNews(newsApi)
-      
+
       if (is.null(values$df_req) || nrow(values$df_req) == 0) {
         values$is_empty <- TRUE
         empty_msg <- i18n$t("No results")
@@ -67,28 +79,26 @@ server <- function(input, output, session) {
         values$is_empty <- FALSE
         # analyze the values
         values$nrc <- processWithNRC(values$df_req, values$lang)
+        values$words <- getWordsWithNRCValences(values$df_req, values$lang)
       }
     }
-    
   })
 
   output$plt_emotion <- shiny::renderPlot({
     title <- stringr::str_to_title(
       stringr::str_interp("Emotion on news mentioning '${values$caption_txt}'")
     )
-
-    subtitle <- i18n$t("NRC Sentiment Analysis (EmoLex)")
+    # subtitle <- i18n$t("NRC Sentiment Analysis (EmoLex)")
 
     if (values$is_empty) {
       ggplot2::ggplot() +
         ggplot2::geom_blank()
     } else {
-      plotEmolex(plot_data = values$nrc, plot_title = title, plot_subtitle = subtitle, translator = i18n)
+      plotEmolex(plot_data = values$nrc, plot_title = title, translator = i18n)
     }
   })
 
   output$plt_media <- shiny::renderPlot({
-    
     if (values$is_empty) {
       ggplot2::ggplot() +
         ggplot2::geom_blank()
@@ -97,15 +107,36 @@ server <- function(input, output, session) {
       plotSources(plot_data = values$nrc)
     }
   })
-  
+
   output$plt_sentiment <- shiny::renderPlot({
-    
     if (values$is_empty) {
       ggplot2::ggplot() +
         ggplot2::geom_blank()
     } else {
       # show plot
-      plotSentiment(plot_data = values$nrc, translator=i18n)
+      plotSentiment(plot_data = values$nrc, translator = i18n)
+    }
+  })
+
+  output$plt_bag_positive <- wordcloud2::renderWordcloud2({
+    if (values$is_empty) {
+      # do nothing
+    } else {
+      values$words %>%
+        filter(positives != 0) %>%
+        select(word, freq = positives) %>%
+        wordcloud2a(size = 1, color = "random-dark")
+    }
+  })
+
+  output$plt_bag_negative <- wordcloud2::renderWordcloud2({
+    if (values$is_empty) {
+      # do nothing
+    } else {
+      values$words %>%
+        filter(negatives != 0) %>%
+        select(word, freq = negatives) %>%
+        wordcloud2a(size = 1, color = "random-dark")
     }
   })
 

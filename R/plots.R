@@ -6,14 +6,14 @@ dry_rosewood <- c("#745250", "#9a5e5c", "#e7cabf", "#d98288", "#e9a093")
 #'
 #' This function plots the sentiment analysis with NRC.
 #'
-plotEmolex <- function(plot_data, plot_title, plot_subtitle, translator) {
+plotEmolex <- function(plot_data, plot_title, translator) {
   caption <- ""
 
   custom_theme <- ggplot2::theme(
     legend.position = "none",
     panel.grid = ggplot2::element_blank(),
     strip.background = ggplot2::element_blank(),
-    plot.title = ggplot2::element_text(size = 15, hjust = 0.5),
+    plot.title = ggplot2::element_text(size = 15, hjust = 0.5, face = "bold"),
     plot.subtitle = ggplot2::element_text(size = 13, color = "darkcyan", hjust = 0.5),
     panel.border = ggplot2::element_rect(fill = NA, color = "white"),
     panel.grid.minor = ggplot2::element_blank(),
@@ -88,7 +88,7 @@ plotEmolex <- function(plot_data, plot_title, plot_subtitle, translator) {
     fill = Sentimiento
   )) +
     ggplot2::geom_rect(color = "whitesmoke") +
-    ggplot2::ggtitle(plot_title, plot_subtitle) +
+    ggplot2::ggtitle(plot_title) +
     ggrepel::geom_text_repel(x = 2, ggplot2::aes(y = labelPosition, label = label), size = 4) +
     # x here controls label position (inner / outer)
     ggplot2::scale_fill_brewer(palette = 3) +
@@ -108,7 +108,7 @@ plotSources <- function(plot_data) {
 
   custom_theme <- ggplot2::theme(
     legend.position = "none",
-    plot.title = ggplot2::element_text(size = 15, hjust = 0.5),
+    plot.title = ggplot2::element_text(size = 15, hjust = 0.5, face = "bold"),
     plot.subtitle = ggplot2::element_text(size = 13, color = "darkcyan", hjust = 0.5),
     axis.title.x = ggplot2::element_blank(),
     axis.title.y = ggplot2::element_blank(),
@@ -125,8 +125,7 @@ plotSources <- function(plot_data) {
   rose_palette <- rep(dry_rosewood, length.out = number)
 
 
-  title <- stringr::str_to_title("Sources Contributing")
-  subtitle <- "Number of articles provided by each media"
+  title <- stringr::str_to_title("Number of articles provided by each media")
 
   by_ticks <- 3
 
@@ -139,14 +138,14 @@ plotSources <- function(plot_data) {
   }
 
   plot <- data %>% ggplot2::ggplot(ggplot2::aes(x = source.name, y = count, fill = source.name)) +
-    ggplot2::geom_bar(stat = "identity") +
+    ggplot2::geom_bar(stat = "identity", color = "#777777") +
     ggplot2::scale_fill_manual(values = rose_palette) +
     ggplot2::scale_y_continuous(
       labels = scales::label_number(accuracy = 1),
-      breaks = seq(from = 0, to = max(data$count), by =by_ticks)
+      breaks = seq(from = 0, to = max(data$count), by = by_ticks)
     ) +
     ggplot2::coord_flip() +
-    ggplot2::ggtitle(title, subtitle = subtitle) +
+    ggplot2::ggtitle(title) +
     custom_theme
 
   return(plot)
@@ -157,8 +156,7 @@ plotSources <- function(plot_data) {
 #' This function plots the sentiment analysis with NRC.
 #'
 plotSentiment <- function(plot_data, translator) {
-  title <- "Sentiment Found"
-  subtitle <- "Summary of all the words analyzed"
+  title <- stringr::str_to_title("Summary of all the words analyzed")
 
   custom_theme <- ggplot2::theme(
     axis.title.x = ggplot2::element_blank(),
@@ -171,7 +169,7 @@ plotSentiment <- function(plot_data, translator) {
     panel.grid.minor = ggplot2::element_blank(),
     panel.grid.major = ggplot2::element_blank(),
     legend.position = "none",
-    plot.title = ggplot2::element_text(size = 15, hjust = 0.5),
+    plot.title = ggplot2::element_text(size = 15, hjust = 0.5, face = "bold"),
     plot.subtitle = ggplot2::element_text(size = 13, color = "darkcyan", hjust = 0.5)
   )
 
@@ -216,11 +214,14 @@ plotSentiment <- function(plot_data, translator) {
   data$percent <- data$valencia / sum(data$valencia)
   data$label <- paste0(data$Sentiment, ": ", format(round(data$percent * 100, 2), nsmall = 2), "%")
 
-  plot <- data %>% ggplot2::ggplot(aes(x = 1, y = valencia, fill = Sentiment)) +
-    ggplot2::geom_bar(stat = "identity") +
-    ggplot2::ggtitle(title, subtitle = subtitle) +
+  plot <- data %>% ggplot2::ggplot(aes(x = 0.5, y = valencia, fill = Sentiment)) +
+    ggplot2::geom_bar(stat = "identity", color = "#777777") +
+    ggplot2::ggtitle(title) +
     ggplot2::scale_fill_manual(values = c("tomato1", "springgreen2")) +
-    ggplot2::geom_text(aes(label = label, y = valencia), position = "stack") +
+    ggplot2::geom_text(aes(label = label, y = valencia),
+      position = "stack",
+      size = 4.5, vjust = 2
+    ) +
     ggplot2::theme_minimal() +
     custom_theme
 

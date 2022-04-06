@@ -59,64 +59,71 @@ getCorpus <- function(text_v, language) {
   return(txt_new_corpus)
 }
 
+#' Format and clean data
+#'
+#' This function cleans and tidy the data
+#'
+previousDataCleaning <- function(df) {
+  aux <- df
+
+  aux$id <- (1:nrow(aux))
+
+  Encoding(aux$title) <- "UTF-8"
+  Encoding(aux$description) <- "UTF-8"
+  Encoding(aux$url) <- "UTF-8"
+  Encoding(aux$urlToImage) <- "UTF-8"
+  Encoding(aux$content) <- "UTF-8"
+  Encoding(aux$source.name) <- "UTF-8"
+
+  aux <- aux %>% dplyr::mutate(content = stringr::str_replace(content, "/", " "))
+  aux <- aux %>% dplyr::mutate(content = stringr::str_replace(content, "\n", " "))
+  aux <- aux %>% dplyr::mutate(content = stringr::str_replace(content, "\r", " "))
+  aux <- aux %>% dplyr::mutate(content = stringr::str_replace(content, "@", " "))
+  aux <- aux %>% dplyr::mutate(content = stringr::str_replace(content, "\\|", " "))
+  aux <- aux %>% dplyr::mutate(content = stringr::str_replace(content, "‘", " "))
+  aux <- aux %>% dplyr::mutate(content = stringr::str_replace(content, "“", " "))
+  aux <- aux %>% dplyr::mutate(content = stringr::str_replace(content, "”", " "))
+  aux <- aux %>% dplyr::mutate(content = stringr::str_replace(content, "’", " "))
+
+  aux$content <- gsub("[0-9.]", "", aux$content)
+
+  return(aux)
+}
+
 #' Process news with NRC
 #'
 #' This function analyzes the news dataframe with the NRC method.
 #'
 processWithNRC <- function(df, lang = "es", target = "content") {
+  language_code <- supported_langs[lang]
+
   if (nrow(df) == 0) {
     return(NULL)
   }
 
-  df$id <- (1:nrow(df))
-
-  language_code <- supported_langs[lang]
-  Encoding(df$title) <- "UTF-8"
-  Encoding(df$description) <- "UTF-8"
-  Encoding(df$url) <- "UTF-8"
-  Encoding(df$urlToImage) <- "UTF-8"
-  Encoding(df$content) <- "UTF-8"
-  Encoding(df$source.name) <- "UTF-8"
-
-  df <- df %>% dplyr::mutate(content = stringr::str_replace(content, "/", " "))
-  df <- df %>% dplyr::mutate(content = stringr::str_replace(content, "\n", " "))
-  df <- df %>% dplyr::mutate(content = stringr::str_replace(content, "\r", " "))
-  df <- df %>% dplyr::mutate(content = stringr::str_replace(content, "@", " "))
-  df <- df %>% dplyr::mutate(content = stringr::str_replace(content, "\\|", " "))
-  df <- df %>% dplyr::mutate(content = stringr::str_replace(content, "‘", " "))
-  df <- df %>% dplyr::mutate(content = stringr::str_replace(content, "“", " "))
-  df <- df %>% dplyr::mutate(content = stringr::str_replace(content, "”", " "))
-  df <- df %>% dplyr::mutate(content = stringr::str_replace(content, "’", " "))
-
-
-  df$content <- gsub("[0-9.]", "", df$content)
+  df_res <- previousDataCleaning(df)
 
   # Collect all descriptions
-  for (i in 1:nrow(df)) {
-    sentence_v <- df[i, target]
+  for (i in 1:nrow(df_res)) {
+    sentence_v <- df_res[i, target]
     char_v <- syuzhet::get_sentences(sentence_v, fix_curly_quotes = TRUE)
 
     if (i == 1) {
       nrc_data <- syuzhet::get_nrc_sentiment(char_v, language = language_code)
       nrc_sum <- colSums(nrc_data)
       nrc_sum <- append(nrc_sum, i)
-      names(nrc_sum) <- c(
-        "anger", "anticipation", "disgust", "fear", "joy",
-        "sadness", "surprise", "trust", "negative",
-        "positive", "id"
-      )
     } else {
       aux_data <- syuzhet::get_nrc_sentiment(char_v, language = language_code)
       aux_sum <- colSums(aux_data)
       aux_sum <- append(aux_sum, i)
-      names(aux_sum) <- c(
-        "anger", "anticipation", "disgust", "fear", "joy",
-        "sadness", "surprise", "trust", "negative",
-        "positive", "id"
-      )
-
       nrc_sum <- rbind(nrc_sum, aux_sum)
     }
+
+    names(nrc_sum) <- c(
+      "anger", "anticipation", "disgust", "fear", "joy",
+      "sadness", "surprise", "trust", "negative",
+      "positive", "id"
+    )
   }
 
   df_nrc <- as.data.frame(nrc_sum)
@@ -127,7 +134,47 @@ processWithNRC <- function(df, lang = "es", target = "content") {
 
   rownames(df_nrc) <- 1:nrow(df_nrc)
 
-  df <- df %>%
+  df_res <- df_res %>%
     dplyr::inner_join(df_nrc, by = c("id" = "id"), copy = TRUE)
-  return(df)
+
+  return(df_res)
+}
+
+#' Get words with his meanings
+#'
+#' This function returns the words with his valences
+#'
+getWordsWithNRCValences <- function(df, lang = "es", target = "content") {
+  if (nrow(df) == 0) {
+    return(NULL)
+  }
+
+  language_code <- supported_langs[lang]
+  df_res <- previousDataCleaning(df)
+
+  # Collect all descriptions
+  for (i in 1:nrow(df_res)) {
+    sentence_v <- df_res[i, target]
+    char_v <- syuzhet::get_sentences(sentence_v, fix_curly_quotes = TRUE)
+    word <- get_tokens(char_v, pattern = "\\W")
+    nrc <- syuzhet::get_nrc_sentiment(word, language = language_code)[, c("negative", "positive")]
+
+    if (i == 1) {
+      nrc_words <- cbind(word, nrc)
+    } else {
+      nrc_words <- rbind(nrc_words, cbind(word, nrc))
+    }
+  }
+
+  df_nrc <- as.data.frame(nrc_words) %>%
+    dplyr::filter(negative != 0 | positive != 0)
+
+  df_nrc <- df_nrc %>%
+    group_by(word) %>%
+    summarise(
+      positives = sum(positive),
+      negatives = sum(negative)
+    )
+
+  return(df_nrc)
 }

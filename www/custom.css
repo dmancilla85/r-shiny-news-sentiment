@@ -2,6 +2,7 @@
 
 body {
   background-color: #f2eddf;
+  font-family: "Lato", sans-serif !important;
 }
 
 h2 {
@@ -37,6 +38,21 @@ div .content-wrapper{
   background-color: #C0C0C0;
 }
 
+.box-header {
+  font-family: "Lato", sans-serif;
+}
+
+.box.box-solid.box-primary>.box-header {
+    background: #2F2C2C !important;
+    background-color: #2F2C2C !important;
+}
+
+.image-modal {
+ height: 100%;
+ width: 100%;
+ object-fit: contain;
+}
+
 .main-header .logo {
   font-family: "Merienda", cursive;
 }
@@ -53,6 +69,7 @@ div .content-wrapper{
 }
 
 .modal-body {
+  /*background-color: #f39c12;*/
   font-weight: bold;
   font-size: 20px;
   color: #b2481b;
@@ -60,16 +77,42 @@ div .content-wrapper{
   font-family: "Merienda";
 }
 
+.modal-help-text {
+  font-family: "Lato", sans-serif;
+  font-weight: normal;
+  list-style: circle outside;
+  font-size: 16px;
+  text-align: left;
+  display: block;
+  padding: 10px 50px;
+}
+
+.modal-help-text h2 {
+  font-weight: bold;
+}
+
+.modal-help-text h3 {
+  font-family: "Merienda", cursive;
+}
+
 .selectize-input items full has-options has-items{
   font-family: 'Lato', sans-serif;
 }
 
-.shiny-plot.output {
+.shiny-plot-output img {
 	border-radius: 20px;
 	border: 10px;
 	background-color: lightcoral;
 }
 
-.sidebar shiny-bound-input{
+.sidebar .shiny-input-container {
   font-family: 'Lato', sans-serif;
+}
+
+.sidebar .shiny-bound-input, label{
+  font-family: 'Lato', sans-serif;
+}
+
+.welcome-modal {
+  object-fit: cover;
 }

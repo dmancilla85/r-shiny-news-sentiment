@@ -3,7 +3,7 @@ footerModule <- modules::module({
   
 htmlLeft <-
   shiny::HTML(
-    "<span id='footer-text'>Sentiment on News, David A. Mancilla, &copy; 2021. Based on syuzhet package and NRC EmoLex (saifmohammad.com/WebPages/NRC-Emotion-Lexicon.htm)</span>"
+    "<span id='footer-text'>Sentiment on News, David A. Mancilla, &copy; 2021. Based on syuzhet package and NRC EmoLex (saifmohammad.com/WebPages/NRC-Emotion-Lexicon.htm). Welcome ilustration designed by <a href='http://www.freepik.com'>stories / Freepik</a>.</span>"
   )
 
 htmlRight <- shiny::HTML(

@@ -155,10 +155,12 @@ getWordsWithNRCValences <- function(df, lang = "es", target = "content") {
   # Collect all descriptions
   for (i in 1:nrow(df_res)) {
     sentence_v <- df_res[i, target]
-    char_v <- syuzhet::get_sentences(sentence_v, fix_curly_quotes = TRUE)
-    word <- get_tokens(char_v, pattern = "\\W")
-    nrc <- syuzhet::get_nrc_sentiment(word, language = language_code)[, c("negative", "positive")]
+    word <- syuzhet::get_sentences(sentence_v, fix_curly_quotes = TRUE)
+    word <- get_tokens(word, pattern = "\\W")
 
+    nrc <- syuzhet::get_nrc_sentiment(word, language = language_code)
+    nrc <- nrc %>% dplyr::select(negative,positive)
+    
     if (i == 1) {
       nrc_words <- cbind(word, nrc)
     } else {
@@ -168,7 +170,7 @@ getWordsWithNRCValences <- function(df, lang = "es", target = "content") {
 
   df_nrc <- as.data.frame(nrc_words) %>%
     dplyr::filter(negative != 0 | positive != 0)
-
+  
   df_nrc <- df_nrc %>%
     group_by(word) %>%
     summarise(
@@ -177,4 +179,49 @@ getWordsWithNRCValences <- function(df, lang = "es", target = "content") {
     )
 
   return(df_nrc)
+}
+
+getSentimentValues <- function(nrc_data, translator){
+  nrc <- nrc_data %>%
+    dplyr::select(
+      -title,
+      -description,
+      -content,
+      -url,
+      -urlToImage,
+      -source.name,
+      -publishedAt
+    ) %>%
+    tidyr::pivot_longer(
+      cols = c(
+        "anger",
+        "anticipation",
+        "disgust",
+        "fear",
+        "joy",
+        "sadness",
+        "surprise",
+        "trust",
+        "negative",
+        "positive"
+      ),
+      names_to = "Sentiment",
+      names_repair = "unique"
+    ) %>%
+    dplyr::filter(Sentiment %in% c("positive", "negative"))
+  
+  nrc[nrc$Sentiment == "positive", ]$Sentiment <- translator$t("Positive")
+  nrc[nrc$Sentiment == "negative", ]$Sentiment <- translator$t("Negative")
+  
+  data <- nrc %>%
+    dplyr::select(Sentiment, value) %>%
+    dplyr::filter(value != 0) %>%
+    dplyr::group_by(Sentiment) %>%
+    dplyr::summarise(valencia = sum(value))
+  
+  
+  data$percent <- data$valencia / sum(data$valencia)
+  data$label <- paste0(data$Sentiment, ": ", format(round(data$percent * 100, 2), nsmall = 2), "%")
+  
+  return(data)
 }

@@ -9,6 +9,7 @@ ui <- dashboardPage(
   header = dashboardHeader(title = "Sentiment on News"),
   sidebar = showSidebar(i18n),
   body = dashboardBody(
+    shinyjs::useShinyjs(),
     htmltools::tags$head(
       htmltools::tags$link(rel = "icon", href = "favicon.ico"),
       htmltools::tags$link(
@@ -28,6 +29,9 @@ ui <- dashboardPage(
         content = "App to analize emotion and sentiment on news content, using the NRC EmoLex."
       )
     ),
+    # Spinner
+    shinybusy::add_busy_spinner(spin = "semipolar", height = "200px", 
+                     width = "200px", margins = c(30, 30), color = "#fff"),
     # Tooltips
     shinyBS::bsTooltip("sel_language", "Language of the news",
       "right",
@@ -50,21 +54,19 @@ ui <- dashboardPage(
       "right",
       options = list(container = "body", animation = "true")
     ),
-    shinyBS::bsTooltip("btn_start", "Click to start sentiment analysis on news",
-      "right",
-      options = list(container = "body", animation = "true")
-    ),
     shinyBS::bsTooltip("txt_caption", "Enter the keyword to search",
       "right",
       options = list(container = "body", animation = "true")
     ),
     # Show a plot of the generated distribution
     fluidRow(
-      # row 1
+      # row 1 
       shinydashboard::box(
         title = "Bag of Positive Sentiments",
         width = 6,
-        background = "orange",
+        status = "warning",
+        solidHeader = TRUE,
+        collapsible = TRUE,
         shinycustomloader::withLoader(
           loader = spinner_type,
           wordcloud2::wordcloud2Output(outputId = "plt_bag_positive")
@@ -73,44 +75,61 @@ ui <- dashboardPage(
       shinydashboard::box(
         title = "Bag of Negative Sentiments",
         width = 6,
-        background = "orange",
+        status = "warning",
+        solidHeader = TRUE,
+        collapsible = TRUE,
         shinycustomloader::withLoader(
           loader = spinner_type,
           wordcloud2::wordcloud2Output(outputId = "plt_bag_negative")
         )
       ),
+      
       # row 2
+      infoBoxOutput("box_keyword",width = 4),
+      infoBoxOutput("box_positive",width = 4),
+      infoBoxOutput("box_negative",width = 4),
+      
+      # row 3
       shinydashboard::box(
         title = "Sentiment Analysis (EmoLex)",
-        width = 5,
-        background = "black",
+        width = 7,
+        status = "primary",
+        solidHeader = TRUE,
+        collapsible = TRUE,
         shinycustomloader::withLoader(
           loader = spinner_type,
           plotOutput(outputId = "plt_emotion")
         )
       ),
-      shinydashboard::box(
-        title = "Sentiment Balance",
-        background = "black",
-        width = 3,
-        shinycustomloader::withLoader(
-          loader = spinner_type,
-          plotOutput(outputId = "plt_sentiment")
-        )
-      ),
+      # shinydashboard::box(
+      #   title = "Sentiment Balance",
+      #   status = "primary",
+      #   solidHeader = TRUE,
+      #   collapsible = TRUE,
+      #   width = 3,
+      #   shinycustomloader::withLoader(
+      #     loader = spinner_type,
+      #     plotOutput(outputId = "plt_sentiment")
+      #   )
+      # ),
       shinydashboard::box(
         title = "Sources Contributing",
-        width = 4,
-        background = "black",
+        width = 5,
+        status = "primary",
+        solidHeader = TRUE,
+        collapsible = TRUE,
         shinycustomloader::withLoader(
           loader = spinner_type,
           plotOutput(outputId = "plt_media")
         )
       ),
-      # row 3
+      # row 4
       shinydashboard::box(
         title = "News analyzed",
         width = 12,
+        status = "warning",
+        solidHeader = TRUE,
+        collapsible = TRUE,
         shinycustomloader::withLoader(
           loader = spinner_type,
           DT::dataTableOutput(outputId = "tbl_sentiment")

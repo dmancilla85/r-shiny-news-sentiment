@@ -3,11 +3,7 @@
 server <- function(input, output, session) {
 
   # show modal
-  showModal(modalDialog(
-    easyClose = T,
-    h2("Welcome to Sentiment on News"),
-    "Choose the language, country, write a keyword and then click on the Search button"
-  ))
+  showModal(modalsModule$welcomeModal())
 
   observeEvent(input$close_modal, {
     removeModal()
@@ -36,6 +32,10 @@ server <- function(input, output, session) {
   values$is_empty <- TRUE
 
   shiny::observeEvent(input$btn_start, {
+
+    # disable action button
+    shinyjs::disable("btn_start")
+
     values$date_range <- shiny::isolate(input$dt_fechas)
     values$caption_txt <- shiny::isolate(input$txt_caption)
     values$country <- shiny::isolate(input$sel_country)
@@ -62,9 +62,9 @@ server <- function(input, output, session) {
         p_category = values$category,
         p_searchInTitles = values$titles
       )
-
+      
       values$df_req <- getNews(newsApi)
-
+      
       if (is.null(values$df_req) || nrow(values$df_req) == 0) {
         values$is_empty <- TRUE
         empty_msg <- i18n$t("No results")
@@ -78,8 +78,33 @@ server <- function(input, output, session) {
       } else {
         values$is_empty <- FALSE
         # analyze the values
-        values$nrc <- processWithNRC(values$df_req, values$lang)
-        values$words <- getWordsWithNRCValences(values$df_req, values$lang)
+
+        inicio<- Sys.time()
+        values$nrc <- future::value(
+          future::future(
+            processWithNRC(values$df_req, values$lang)
+          ) %plan% future::multicore
+        )
+        fin<-Sys.time()
+        print(str_interp("NRC_Emotions: ${difftime(fin,inicio,units='secs')} secs"))
+
+        inicio<- Sys.time()
+        values$words <- future::value(
+          future::future(
+            getWordsWithNRCValences(values$df_req, values$lang)
+          ) %plan% future::multicore
+        )
+        fin<-Sys.time()
+        print(str_interp("NRC_Words: ${difftime(fin,inicio,units='secs')} secs"))
+
+        inicio<- Sys.time()
+        values$sentiment <- future::value(
+          future::future(
+            getSentimentValues(values$nrc, translator = i18n)
+          ) %plan% future::multicore
+        )
+        fin<-Sys.time()
+        print(str_interp("NRC_Sentiment: ${difftime(fin,inicio,units='secs')} secs"))
       }
     }
   })
@@ -94,6 +119,8 @@ server <- function(input, output, session) {
       ggplot2::ggplot() +
         ggplot2::geom_blank()
     } else {
+      # enable action button
+      shinyjs::enable("btn_start")
       plotEmolex(plot_data = values$nrc, plot_title = title, translator = i18n)
     }
   })
@@ -108,15 +135,15 @@ server <- function(input, output, session) {
     }
   })
 
-  output$plt_sentiment <- shiny::renderPlot({
-    if (values$is_empty) {
-      ggplot2::ggplot() +
-        ggplot2::geom_blank()
-    } else {
-      # show plot
-      plotSentiment(plot_data = values$nrc, translator = i18n)
-    }
-  })
+  # output$plt_sentiment <- shiny::renderPlot({
+  #   if (values$is_empty) {
+  #     ggplot2::ggplot() +
+  #       ggplot2::geom_blank()
+  #   } else {
+  #     # show plot
+  #     plotSentiment(sentiment_data = values$sentiment, translator = i18n)
+  #   }
+  # })
 
   output$plt_bag_positive <- wordcloud2::renderWordcloud2({
     if (values$is_empty) {
@@ -138,6 +165,48 @@ server <- function(input, output, session) {
         select(word, freq = negatives) %>%
         wordcloud2a(size = 1, color = "random-dark")
     }
+  })
+
+  output$box_keyword <- renderInfoBox({
+    
+    value <- "Empty now"
+    
+    if (!values$is_empty) {
+      value <- stringr::str_to_title(values$caption_txt)
+    }
+    
+    infoBox(
+      "Keyword", value, icon = icon("wind", lib = "font-awesome"),
+      color = "aqua"
+    )
+  })
+
+  output$box_positive <- renderInfoBox({
+    value <- 0.00
+
+    if (!values$is_empty) {
+      value <- format(values$sentiment[2, "percent"] * 100, digits = 4)
+    }
+
+    infoBox(
+      "Positive", stringr::str_interp("${value}%"), 
+      icon = icon("thumbs-up", lib = "font-awesome"),
+      color = "green"
+    )
+  })
+
+  output$box_negative <- renderInfoBox({
+    value <- 0.00
+
+    if (!values$is_empty) {
+      value <- format(values$sentiment[1, "percent"] * 100, digits = 4)
+    }
+
+    infoBox(
+      "Negative", stringr::str_interp("${value}%"), 
+      icon = icon("thumbs-down", lib = "font-awesome"),
+      color = "red"
+    )
   })
 
   output$tbl_sentiment <- renderNewsTable(values)

@@ -6,6 +6,16 @@
 loadAllLibraries <- function() {
   print("Loading libraries...")
 
+  if (!require(shinyjs)) {
+    install.packages("shinyjs")
+    library(shinyjs)
+  }
+  
+  if (!require(shinybusy)) {
+    install.packages("shinybusy")
+    library(shinybusy)
+  }
+  
   if (!require(wordcloud2)) {
     install.packages("wordcloud2")
     library(wordcloud2)

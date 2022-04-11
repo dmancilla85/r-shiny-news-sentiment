@@ -6,7 +6,7 @@ renderNewsTable <- function(values) {
     } else {
       df_formatted <- values$df_req
       df_formatted$Imagen <- paste0(
-        "<a href='", df_formatted$url, "'>",
+        "<a href='", df_formatted$url, "' target='_blank'>",
         "<img src=", df_formatted$urlToImage,
         " height=64></img></a>"
       )

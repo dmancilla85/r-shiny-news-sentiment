@@ -155,7 +155,7 @@ plotSources <- function(plot_data) {
 #'
 #' This function plots the sentiment analysis with NRC.
 #'
-plotSentiment <- function(plot_data, translator) {
+plotSentiment <- function(sentiment_data, translator) {
   title <- stringr::str_to_title("Summary of all the words analyzed")
 
   custom_theme <- ggplot2::theme(
@@ -173,48 +173,7 @@ plotSentiment <- function(plot_data, translator) {
     plot.subtitle = ggplot2::element_text(size = 13, color = "darkcyan", hjust = 0.5)
   )
 
-  nrc <- plot_data %>%
-    dplyr::select(
-      -title,
-      -description,
-      -content,
-      -url,
-      -urlToImage,
-      -source.name,
-      -publishedAt
-    ) %>%
-    tidyr::pivot_longer(
-      cols = c(
-        "anger",
-        "anticipation",
-        "disgust",
-        "fear",
-        "joy",
-        "sadness",
-        "surprise",
-        "trust",
-        "negative",
-        "positive"
-      ),
-      names_to = "Sentiment",
-      names_repair = "unique"
-    ) %>%
-    dplyr::filter(Sentiment %in% c("positive", "negative"))
-
-  nrc[nrc$Sentiment == "positive", ]$Sentiment <- translator$t("Positive")
-  nrc[nrc$Sentiment == "negative", ]$Sentiment <- translator$t("Negative")
-
-  data <- nrc %>%
-    dplyr::select(Sentiment, value) %>%
-    dplyr::filter(value != 0) %>%
-    dplyr::group_by(Sentiment) %>%
-    dplyr::summarise(valencia = sum(value))
-
-
-  data$percent <- data$valencia / sum(data$valencia)
-  data$label <- paste0(data$Sentiment, ": ", format(round(data$percent * 100, 2), nsmall = 2), "%")
-
-  plot <- data %>% ggplot2::ggplot(aes(x = 0.5, y = valencia, fill = Sentiment)) +
+  plot <- sentiment_data %>% ggplot2::ggplot(aes(x = 0.5, y = valencia, fill = Sentiment)) +
     ggplot2::geom_bar(stat = "identity", color = "#777777") +
     ggplot2::ggtitle(title) +
     ggplot2::scale_fill_manual(values = c("tomato1", "springgreen2")) +

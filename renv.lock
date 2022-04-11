@@ -1145,6 +1145,19 @@
         "shiny"
       ]
     },
+    "shinybusy": {
+      "Package": "shinybusy",
+      "Version": "0.3.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "f64f08367358906d34a0ff490838d71c",
+      "Requirements": [
+        "htmltools",
+        "htmlwidgets",
+        "jsonlite",
+        "shiny"
+      ]
+    },
     "shinycustomloader": {
       "Package": "shinycustomloader",
       "Version": "0.9.0",
@@ -1181,6 +1194,18 @@
         "shiny",
         "shinydashboard",
         "waiter"
+      ]
+    },
+    "shinyjs": {
+      "Package": "shinyjs",
+      "Version": "2.1.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "802e4786b353a4bb27116957558548d5",
+      "Requirements": [
+        "digest",
+        "jsonlite",
+        "shiny"
       ]
     },
     "slam": {

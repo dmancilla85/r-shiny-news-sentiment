@@ -1,5 +1,6 @@
 
 renderNewsTable <- function(values) {
+
   dt <- DT::renderDataTable({
     if (values$is_empty) {
       DT::datatable(NULL)

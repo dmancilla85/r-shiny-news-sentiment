@@ -62,9 +62,9 @@ server <- function(input, output, session) {
         p_category = values$category,
         p_searchInTitles = values$titles
       )
-      
+
       values$df_req <- getNews(newsApi)
-      
+
       if (is.null(values$df_req) || nrow(values$df_req) == 0) {
         values$is_empty <- TRUE
         empty_msg <- i18n$t("No results")
@@ -79,31 +79,20 @@ server <- function(input, output, session) {
         values$is_empty <- FALSE
         # analyze the values
 
-        inicio<- Sys.time()
-        values$nrc <- future::value(
-          future::future(
-            processWithNRC(values$df_req, values$lang)
-          ) %plan% future::multicore
-        )
-        fin<-Sys.time()
+        inicio <- Sys.time()
+        values$nrc <- processWithNRC(values$df_req, values$lang)
+        fin <- Sys.time()
         print(str_interp("NRC_Emotions: ${difftime(fin,inicio,units='secs')} secs"))
 
-        inicio<- Sys.time()
-        values$words <- future::value(
-          future::future(
-            getWordsWithNRCValences(values$df_req, values$lang)
-          ) %plan% future::multicore
-        )
-        fin<-Sys.time()
+        inicio <- Sys.time()
+        values$words <- getWordsWithNRCValences(values$df_req, values$lang)
+        fin <- Sys.time()
         print(str_interp("NRC_Words: ${difftime(fin,inicio,units='secs')} secs"))
 
-        inicio<- Sys.time()
-        values$sentiment <- future::value(
-          future::future(
-            getSentimentValues(values$nrc, translator = i18n)
-          ) %plan% future::multicore
-        )
-        fin<-Sys.time()
+        inicio <- Sys.time()
+        values$sentiment <- getSentimentValues(values$nrc, translator = i18n)
+        fin <- Sys.time()
+
         print(str_interp("NRC_Sentiment: ${difftime(fin,inicio,units='secs')} secs"))
       }
     }
@@ -121,7 +110,9 @@ server <- function(input, output, session) {
     } else {
       # enable action button
       shinyjs::enable("btn_start")
-      plotEmolex(plot_data = values$nrc, plot_title = title, translator = i18n)
+
+      values$nrc %>%
+        plotEmolex(plot_title = title, translator = i18n)
     }
   })
 
@@ -131,7 +122,8 @@ server <- function(input, output, session) {
         ggplot2::geom_blank()
     } else {
       # show plot
-      plotSources(plot_data = values$nrc)
+      values$nrc %>%
+        plotSources()
     }
   })
 
@@ -168,40 +160,40 @@ server <- function(input, output, session) {
   })
 
   output$box_keyword <- renderInfoBox({
-    
     value <- "Empty now"
-    
+
     if (!values$is_empty) {
       value <- stringr::str_to_title(values$caption_txt)
     }
-    
+
     infoBox(
-      "Keyword", value, icon = icon("wind", lib = "font-awesome"),
+      "Keyword", value,
+      icon = icon("wind", lib = "font-awesome"),
       color = "aqua"
     )
   })
 
   output$box_positive <- renderInfoBox({
     value <- 0.00
-
+    
     if (!values$is_empty) {
       value <- format(values$sentiment[2, "percent"] * 100, digits = 4)
     }
-
+    
     infoBox(
       "Positive", stringr::str_interp("${value}%"), 
       icon = icon("thumbs-up", lib = "font-awesome"),
       color = "green"
     )
   })
-
+  
   output$box_negative <- renderInfoBox({
     value <- 0.00
-
+    
     if (!values$is_empty) {
       value <- format(values$sentiment[1, "percent"] * 100, digits = 4)
     }
-
+    
     infoBox(
       "Negative", stringr::str_interp("${value}%"), 
       icon = icon("thumbs-down", lib = "font-awesome"),

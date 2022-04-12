@@ -1,4 +1,4 @@
-
+# syuzhetModule <- modules::module({
 supported_langs <- c(
   "basque",
   "catalan",
@@ -159,8 +159,8 @@ getWordsWithNRCValences <- function(df, lang = "es", target = "content") {
     word <- get_tokens(word, pattern = "\\W")
 
     nrc <- syuzhet::get_nrc_sentiment(word, language = language_code)
-    nrc <- nrc %>% dplyr::select(negative,positive)
-    
+    nrc <- nrc %>% dplyr::select(negative, positive)
+
     if (i == 1) {
       nrc_words <- cbind(word, nrc)
     } else {
@@ -170,7 +170,7 @@ getWordsWithNRCValences <- function(df, lang = "es", target = "content") {
 
   df_nrc <- as.data.frame(nrc_words) %>%
     dplyr::filter(negative != 0 | positive != 0)
-  
+
   df_nrc <- df_nrc %>%
     group_by(word) %>%
     summarise(
@@ -181,7 +181,7 @@ getWordsWithNRCValences <- function(df, lang = "es", target = "content") {
   return(df_nrc)
 }
 
-getSentimentValues <- function(nrc_data, translator){
+getSentimentValues <- function(nrc_data, translator) {
   nrc <- nrc_data %>%
     dplyr::select(
       -title,
@@ -209,19 +209,20 @@ getSentimentValues <- function(nrc_data, translator){
       names_repair = "unique"
     ) %>%
     dplyr::filter(Sentiment %in% c("positive", "negative"))
-  
+
   nrc[nrc$Sentiment == "positive", ]$Sentiment <- translator$t("Positive")
   nrc[nrc$Sentiment == "negative", ]$Sentiment <- translator$t("Negative")
-  
+
   data <- nrc %>%
     dplyr::select(Sentiment, value) %>%
     dplyr::filter(value != 0) %>%
     dplyr::group_by(Sentiment) %>%
     dplyr::summarise(valencia = sum(value))
-  
-  
+
+
   data$percent <- data$valencia / sum(data$valencia)
   data$label <- paste0(data$Sentiment, ": ", format(round(data$percent * 100, 2), nsmall = 2), "%")
-  
+
   return(data)
 }
+# })

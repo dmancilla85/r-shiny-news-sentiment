@@ -38,8 +38,8 @@ div .content-wrapper{
   background-color: #C0C0C0;
 }
 
-.box-header {
-  font-family: "Lato", sans-serif;
+.box-header h3{
+  font-family: "Merienda", cursive !important;
 }
 
 .box.box-solid.box-primary>.box-header {

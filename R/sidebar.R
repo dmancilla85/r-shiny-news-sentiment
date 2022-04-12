@@ -21,7 +21,7 @@ showSidebar <- # Sidebar with a slider input for number of bins
       ),
       shiny::checkboxInput(
         inputId = "chk_latest_news", label = i18n$t("Top headlines"),
-        value = TRUE
+        value = FALSE
       ),
       shiny::conditionalPanel(
         condition = "input.chk_latest_news == true",

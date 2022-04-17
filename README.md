@@ -13,8 +13,10 @@
 ## TODO 6: Use plotly/interactive plot
 
 ## Instructions
-Add a .Renviron file with the following content:
+In the main path, add a .Renviron file with the following content:
 NEWS_API_TOKEN = <YOUR_API_KEY>
+
+Get your API key on [NewsApi.Org](https://newsapi.org/).
 
 ## Concepts:
 

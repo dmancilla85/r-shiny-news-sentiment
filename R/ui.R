@@ -29,9 +29,6 @@ ui <- dashboardPage(
         content = "App to analize emotion and sentiment on news content, using the NRC EmoLex."
       )
     ),
-    # Spinner
-    shinybusy::add_busy_spinner(spin = "semipolar", height = "200px", 
-                     width = "200px", margins = c(30, 30), color = "#fff"),
     # Tooltips
     shinyBS::bsTooltip("sel_language", "Language of the news",
       "right",

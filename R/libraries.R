@@ -90,6 +90,12 @@ loadAllLibraries <- function() {
     install.packages("future")
     library(future)
   }
+  
+  # Handling promises
+  if (!require(promises)) {
+    install.packages("promises")
+    library(promises)
+  }
 
   # Data  manipulations
   if (!require(dplyr)) {

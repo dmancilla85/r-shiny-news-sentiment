@@ -79,21 +79,33 @@ server <- function(input, output, session) {
         values$is_empty <- FALSE
         # analyze the values
 
-        inicio <- Sys.time()
-        values$nrc <- processWithNRC(values$df_req, values$lang)
-        fin <- Sys.time()
-        print(str_interp("NRC_Emotions: ${difftime(fin,inicio,units='secs')} secs"))
+        df_req <- values$df_req
+        lang <- values$lang
+
+        plan(multicore)
 
         inicio <- Sys.time()
-        values$words <- getWordsWithNRCValences(values$df_req, values$lang)
+        values$nrc <- promises::future_promise({
+          processWithNRC(df_req, lang)
+        })
         fin <- Sys.time()
-        print(str_interp("NRC_Words: ${difftime(fin,inicio,units='secs')} secs"))
+        print(stringr::str_interp("NRC_Emotions: ${difftime(fin,inicio,units='secs')} secs"))
 
         inicio <- Sys.time()
-        values$sentiment <- getSentimentValues(values$nrc, translator = i18n)
+        values$words <- promises::future_promise({
+          getWordsWithNRCValences(df_req, lang)
+        })
+        fin <- Sys.time()
+        print(stringr::str_interp("NRC_Words: ${difftime(fin,inicio,units='secs')} secs"))
+
+        inicio <- Sys.time()
+        nrc <- values$nrc
+        values$sentiment <- promises::future_promise({
+          nrc %...>% getSentimentValues(translator = i18n)
+        })
         fin <- Sys.time()
 
-        print(str_interp("NRC_Sentiment: ${difftime(fin,inicio,units='secs')} secs"))
+        print(stringr::str_interp("NRC_Sentiment: ${difftime(fin,inicio,units='secs')} secs"))
       }
     }
   })
@@ -111,7 +123,7 @@ server <- function(input, output, session) {
       # enable action button
       shinyjs::enable("btn_start")
 
-      values$nrc %>%
+      values$nrc %...>%
         plotEmolex(plot_title = title, translator = i18n)
     }
   })
@@ -122,7 +134,7 @@ server <- function(input, output, session) {
         ggplot2::geom_blank()
     } else {
       # show plot
-      values$nrc %>%
+      values$nrc %...>%
         plotSources()
     }
   })
@@ -141,9 +153,9 @@ server <- function(input, output, session) {
     if (values$is_empty) {
       # do nothing
     } else {
-      values$words %>%
-        filter(positives != 0) %>%
-        select(word, freq = positives) %>%
+      values$words %...>%
+        filter(positives != 0) %...>%
+        select(word, freq = positives) %...>%
         wordcloud2a(size = 1, color = "random-dark")
     }
   })
@@ -152,9 +164,9 @@ server <- function(input, output, session) {
     if (values$is_empty) {
       # do nothing
     } else {
-      values$words %>%
-        filter(negatives != 0) %>%
-        select(word, freq = negatives) %>%
+      values$words %...>%
+        filter(negatives != 0) %...>%
+        select(word, freq = negatives) %...>%
         wordcloud2a(size = 1, color = "random-dark")
     }
   })
@@ -174,31 +186,57 @@ server <- function(input, output, session) {
   })
 
   output$box_positive <- renderInfoBox({
-    value <- 0.00
-    
+
     if (!values$is_empty) {
-      value <- format(values$sentiment[2, "percent"] * 100, digits = 4)
+      values$sentiment %>%
+        then(function(value){
+          
+          if(is.na(value[2, "percent"])){
+            value[2, "percent"] <- 0.00
+          }
+          
+          aux <- format(value[2, "percent"] * 100, digits = 4)
+          
+          infoBox(
+            "Positive", stringr::str_interp("${aux}%"),
+            icon = icon("thumbs-up", lib = "font-awesome"),
+            color = "green"
+          )
+        })
+    } else {
+      infoBox(
+        "Positive","0.00%",
+        icon = icon("thumbs-up", lib = "font-awesome"),
+        color = "green"
+      )
     }
-    
-    infoBox(
-      "Positive", stringr::str_interp("${value}%"), 
-      icon = icon("thumbs-up", lib = "font-awesome"),
-      color = "green"
-    )
   })
-  
+
   output$box_negative <- renderInfoBox({
-    value <- 0.00
-    
+
     if (!values$is_empty) {
-      value <- format(values$sentiment[1, "percent"] * 100, digits = 4)
+      values$sentiment %>%
+        then(function(value){
+          
+          if(is.na(value[1, "percent"])){
+            value[1, "percent"] <- 0.00
+          }
+          
+          aux <- format(value[1, "percent"] * 100, digits = 4)
+          
+          infoBox(
+            "Negative", stringr::str_interp("${aux}%"),
+            icon = icon("thumbs-down", lib = "font-awesome"),
+            color = "red"
+          )
+        })
+    } else {
+      infoBox(
+        "Negative","0.00%",
+        icon = icon("thumbs-down", lib = "font-awesome"),
+        color = "red"
+      )
     }
-    
-    infoBox(
-      "Negative", stringr::str_interp("${value}%"), 
-      icon = icon("thumbs-down", lib = "font-awesome"),
-      color = "red"
-    )
   })
 
   output$tbl_sentiment <- renderNewsTable(values)

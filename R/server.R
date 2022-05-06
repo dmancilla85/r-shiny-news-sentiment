@@ -68,6 +68,7 @@ server <- function(input, output, session) {
       if (is.null(values$df_req) || nrow(values$df_req) == 0) {
         values$is_empty <- TRUE
         empty_msg <- i18n$t("No results")
+        shinyjs::enable("btn_start")
 
         showModal(modalDialog(
           shiny::renderText(empty_msg),
@@ -159,43 +160,43 @@ server <- function(input, output, session) {
     }
   })
 
-  output$box_keyword <- renderInfoBox({
-    value <- "Empty now"
+  output$box_keyword <- renderValueBox({
+    value <- "..."
 
     if (!values$is_empty) {
       value <- stringr::str_to_title(values$caption_txt)
     }
 
-    infoBox(
-      "Keyword", value,
+    valueBox(
+      value,"Keyword",
       icon = icon("wind", lib = "font-awesome"),
       color = "aqua"
     )
   })
 
-  output$box_positive <- renderInfoBox({
+  output$box_positive <- renderValueBox({
     value <- 0.00
     
     if (!values$is_empty) {
       value <- format(values$sentiment[2, "percent"] * 100, digits = 4)
     }
     
-    infoBox(
-      "Positive", stringr::str_interp("${value}%"), 
+    valueBox(
+      stringr::str_interp("${value}%"), "Positive sentiment", 
       icon = icon("thumbs-up", lib = "font-awesome"),
       color = "green"
     )
   })
   
-  output$box_negative <- renderInfoBox({
+  output$box_negative <- renderValueBox({
     value <- 0.00
     
     if (!values$is_empty) {
       value <- format(values$sentiment[1, "percent"] * 100, digits = 4)
     }
     
-    infoBox(
-      "Negative", stringr::str_interp("${value}%"), 
+    valueBox(
+      stringr::str_interp("${value}%"), "Negative sentiment", 
       icon = icon("thumbs-down", lib = "font-awesome"),
       color = "red"
     )

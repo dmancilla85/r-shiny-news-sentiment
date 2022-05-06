@@ -30,8 +30,10 @@ ui <- dashboardPage(
       )
     ),
     # Spinner
-    shinybusy::add_busy_spinner(spin = "semipolar", height = "200px", 
-                     width = "200px", margins = c(30, 30), color = "#fff"),
+    shinybusy::add_busy_spinner(
+      spin = "semipolar", height = "200px",
+      width = "200px", margins = c(40, 10), color = "#fff"
+    ),
     # Tooltips
     shinyBS::bsTooltip("sel_language", "Language of the news",
       "right",
@@ -58,11 +60,14 @@ ui <- dashboardPage(
       "right",
       options = list(container = "body", animation = "true")
     ),
-    # Show a plot of the generated distribution
-    fluidRow(
-      # row 1 
+    fluidRow( # row 1
+      valueBoxOutput("box_keyword", width = 3),
+      valueBoxOutput("box_positive", width = 3),
+      valueBoxOutput("box_negative", width = 3)
+    ),
+    fluidRow( # row 2
       shinydashboard::box(
-        title = "Bag of Positive Sentiments",
+        title = "Bag of Positive Words",
         width = 6,
         status = "warning",
         solidHeader = TRUE,
@@ -73,7 +78,7 @@ ui <- dashboardPage(
         )
       ),
       shinydashboard::box(
-        title = "Bag of Negative Sentiments",
+        title = "Bag of Negative Words",
         width = 6,
         status = "warning",
         solidHeader = TRUE,
@@ -83,12 +88,6 @@ ui <- dashboardPage(
           wordcloud2::wordcloud2Output(outputId = "plt_bag_negative")
         )
       ),
-      
-      # row 2
-      infoBoxOutput("box_keyword",width = 4),
-      infoBoxOutput("box_positive",width = 4),
-      infoBoxOutput("box_negative",width = 4),
-      
       # row 3
       shinydashboard::box(
         title = "Sentiment Analysis (EmoLex)",

@@ -38,6 +38,15 @@ div .content-wrapper{
   background-color: #C0C0C0;
 }
 
+.box {
+  border-radius: 20px;
+}
+
+.box-header {
+  border-top-right-radius: 20px;
+  border-top-left-radius: 20px;
+}
+
 .box-header h3{
   font-family: "Merienda", cursive !important;
 }

@@ -39,12 +39,16 @@ div .content-wrapper{
 }
 
 .box {
-  border-radius: 20px;
+  border-radius: 10px;
+}
+
+.box-body {
+  background-color: #EFEDE5;
 }
 
 .box-header {
-  border-top-right-radius: 20px;
-  border-top-left-radius: 20px;
+  border-top-right-radius: 10px;
+  border-top-left-radius: 10px;
 }
 
 .box-header h3{
@@ -78,7 +82,6 @@ div .content-wrapper{
 }
 
 .modal-body {
-  /*background-color: #f39c12;*/
   font-weight: bold;
   font-size: 20px;
   color: #b2481b;
@@ -121,6 +124,11 @@ div .content-wrapper{
 .sidebar .shiny-bound-input, label{
   font-family: 'Lato', sans-serif;
 }
+
+.small-box {
+  border-radius: 10px;
+}
+
 
 .welcome-modal {
   object-fit: cover;

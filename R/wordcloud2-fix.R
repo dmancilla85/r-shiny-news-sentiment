@@ -1,6 +1,6 @@
 wordcloud2a <- function(data, size = 1, minSize = 0, gridSize = 0, fontFamily = "Segoe UI",
                         fontWeight = "bold", color = "random-dark", backgroundColor = "white",
-                        minRotation = -pi / 4, maxRotation = pi / 4, shuffle = TRUE,
+                        minRotation = -pi / 4, maxRotation = pi / 4, shuffle = F,
                         rotateRatio = 0.4, shape = "circle", ellipticity = 0.65,
                         widgetsize = NULL, figPath = NULL, hoverFunction = NULL) {
   if ("table" %in% class(data)) {

@@ -27,7 +27,6 @@ server <- function(input, output, session) {
     )
   })
 
-  # TODO: revisar validez del analisis de sentimiento
   values <- shiny::reactiveValues()
   values$is_empty <- TRUE
 
@@ -128,16 +127,6 @@ server <- function(input, output, session) {
     }
   })
 
-  # output$plt_sentiment <- shiny::renderPlot({
-  #   if (values$is_empty) {
-  #     ggplot2::ggplot() +
-  #       ggplot2::geom_blank()
-  #   } else {
-  #     # show plot
-  #     plotSentiment(sentiment_data = values$sentiment, translator = i18n)
-  #   }
-  # })
-
   output$plt_bag_positive <- wordcloud2::renderWordcloud2({
     if (values$is_empty) {
       # do nothing
@@ -145,7 +134,7 @@ server <- function(input, output, session) {
       values$words %>%
         filter(positives != 0) %>%
         select(word, freq = positives) %>%
-        wordcloud2a(size = 1, color = "random-dark")
+        wordcloud2a(size = 1, color = "random-dark", backgroundColor = "#EADDCA", shape = "circle")
     }
   })
 
@@ -156,7 +145,7 @@ server <- function(input, output, session) {
       values$words %>%
         filter(negatives != 0) %>%
         select(word, freq = negatives) %>%
-        wordcloud2a(size = 1, color = "random-dark")
+        wordcloud2a(size = 1, color = "random-dark", backgroundColor = "#EADDCA", shape = "circle")
     }
   })
 
@@ -168,7 +157,7 @@ server <- function(input, output, session) {
     }
 
     valueBox(
-      value,"Keyword",
+      value, "Keyword",
       icon = icon("wind", lib = "font-awesome"),
       color = "aqua"
     )
@@ -176,27 +165,27 @@ server <- function(input, output, session) {
 
   output$box_positive <- renderValueBox({
     value <- 0.00
-    
+
     if (!values$is_empty) {
       value <- format(values$sentiment[2, "percent"] * 100, digits = 4)
     }
-    
+
     valueBox(
-      stringr::str_interp("${value}%"), "Positive sentiment", 
+      stringr::str_interp("${value}%"), "Positive sentiment",
       icon = icon("thumbs-up", lib = "font-awesome"),
       color = "green"
     )
   })
-  
+
   output$box_negative <- renderValueBox({
     value <- 0.00
-    
+
     if (!values$is_empty) {
       value <- format(values$sentiment[1, "percent"] * 100, digits = 4)
     }
-    
+
     valueBox(
-      stringr::str_interp("${value}%"), "Negative sentiment", 
+      stringr::str_interp("${value}%"), "Negative sentiment",
       icon = icon("thumbs-down", lib = "font-awesome"),
       color = "red"
     )
@@ -206,5 +195,10 @@ server <- function(input, output, session) {
 
   output$txt_caption <- shiny::renderUI({
     htmltools::HTML("<p>Sentiment Analisys by David A. Mancilla. 2021</p>")
+  })
+  
+  observeEvent(input$info, {
+    # show modal
+    print("show info modal")
   })
 }

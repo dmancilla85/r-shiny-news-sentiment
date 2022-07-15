@@ -125,7 +125,7 @@ plotSources <- function(plot_data) {
   rose_palette <- rep(dry_rosewood, length.out = number)
 
 
-  title <- stringr::str_to_title("Number of articles provided by each media")
+  title <- stringr::str_to_title("Articles provided by each media")
 
   by_ticks <- 3
 
@@ -173,7 +173,7 @@ plotSentiment <- function(sentiment_data, translator) {
     plot.subtitle = ggplot2::element_text(size = 13, color = "darkcyan", hjust = 0.5)
   )
 
-  plot <- sentiment_data %>% ggplot2::ggplot(aes(x = 0.5, y = valencia, fill = Sentiment)) +
+  plot <- sentiment_data |> ggplot2::ggplot(aes(x = 0.5, y = valencia, fill = Sentiment)) +
     ggplot2::geom_bar(stat = "identity", color = "#777777") +
     ggplot2::ggtitle(title) +
     ggplot2::scale_fill_manual(values = c("tomato1", "springgreen2")) +
@@ -186,3 +186,22 @@ plotSentiment <- function(sentiment_data, translator) {
 
   return(plot)
 }
+
+# wordCloud <- function(df){
+#   set.seed(42)
+#   
+#   aux_df <- df %>%
+#     mutate(angle = 45 * sample(-2:2, n(), replace = TRUE, prob = c(0.5, 0.8, 2, 0.8, 0.5)))
+#   
+#   ggplot(
+#     aux_df,
+#     aes(
+#       label = word, size = freq,
+#       color = factor(sample.int(10, nrow(aux_df), replace = TRUE))
+#     )
+#   ) +
+#     geom_text_wordcloud_area() +
+#     scale_size_area(max_size = 36) +
+#     theme_minimal() +
+#     theme(text=element_text(family="sans")) 
+# }

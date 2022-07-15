@@ -11,6 +11,11 @@ loadAllLibraries <- function() {
     library(shinyjs)
   }
   
+  if (!require(shinyWidgets)) {
+    install.packages("shinyWidgets")
+    library(shinyWidgets)
+  }
+  
   if (!require(shinybusy)) {
     install.packages("shinybusy")
     library(shinybusy)

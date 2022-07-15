@@ -63,10 +63,6 @@ showSidebar <- # Sidebar with a slider input for number of bins
         value = NULL,
         placeholder = ""
       ),
-      shiny::actionButton(inputId = "btn_start", label = i18n$t("Search"), icon = icon("search")),
-      shiny::conditionalPanel(
-        condition = "$('html').hasClass('shiny-busy')",
-        htmltools::tags$div(i18n$t("Loading..."), id = "loadmessage")
-      )
+      shiny::actionButton(inputId = "btn_start", label = i18n$t("Search"), icon = icon("search"))
     )
   }

@@ -6,7 +6,14 @@ spinner_type <- "dnaspin"
 ui <- dashboardPage(
   skin = "yellow",
   options = list(sidebarExpandOnHover = TRUE),
-  header = dashboardHeader(title = "Sentiment on News"),
+  header = dashboardHeader(
+    title = "Sentiment on News",
+    controlbarIcon = shiny::icon("bars"),
+    tags$li(
+      class = "dropdown",
+      shinyWidgets::actionBttn("info", "", style="minimal",icon = icon("info"))
+    )
+  ),
   sidebar = showSidebar(i18n),
   body = dashboardBody(
     shinyjs::useShinyjs(),
@@ -32,7 +39,7 @@ ui <- dashboardPage(
     # Spinner
     shinybusy::add_busy_spinner(
       spin = "semipolar", height = "200px",
-      width = "200px", margins = c(40, 10), color = "#fff"
+      width = "200px", margins = c(40, 40), color = "#fff"
     ),
     # Tooltips
     shinyBS::bsTooltip("sel_language", "Language of the news",
@@ -100,19 +107,8 @@ ui <- dashboardPage(
           plotOutput(outputId = "plt_emotion")
         )
       ),
-      # shinydashboard::box(
-      #   title = "Sentiment Balance",
-      #   status = "primary",
-      #   solidHeader = TRUE,
-      #   collapsible = TRUE,
-      #   width = 3,
-      #   shinycustomloader::withLoader(
-      #     loader = spinner_type,
-      #     plotOutput(outputId = "plt_sentiment")
-      #   )
-      # ),
       shinydashboard::box(
-        title = "Sources Contributing",
+        title = "Media Sources",
         width = 5,
         status = "primary",
         solidHeader = TRUE,
@@ -134,6 +130,10 @@ ui <- dashboardPage(
           DT::dataTableOutput(outputId = "tbl_sentiment")
         )
       )
+    ),
+    shiny::conditionalPanel(
+      condition = "$('html').hasClass('shiny-busy')",
+      htmltools::tags$div(i18n$t("Loading..."), id = "loadmessage")
     )
   ),
   footer = shinydashboardPlus::dashboardFooter(left = footerModule$htmlLeft, right = footerModule$htmlRight),

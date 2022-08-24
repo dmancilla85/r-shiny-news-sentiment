@@ -11,7 +11,7 @@ ui <- dashboardPage(
     controlbarIcon = shiny::icon("bars"),
     tags$li(
       class = "dropdown",
-      shinyWidgets::actionBttn("info", "", style="minimal",icon = icon("info"))
+      shinyWidgets::actionBttn("info", "", style = "minimal", icon = icon("info"))
     )
   ),
   sidebar = showSidebar(i18n),
@@ -74,7 +74,7 @@ ui <- dashboardPage(
     ),
     fluidRow( # row 2
       shinydashboard::box(
-        title = "Bag of Positive Words",
+        title = "Positive Words",
         width = 6,
         status = "warning",
         solidHeader = TRUE,
@@ -85,7 +85,7 @@ ui <- dashboardPage(
         )
       ),
       shinydashboard::box(
-        title = "Bag of Negative Words",
+        title = "Negative Words",
         width = 6,
         status = "warning",
         solidHeader = TRUE,
@@ -95,30 +95,45 @@ ui <- dashboardPage(
           wordcloud2::wordcloud2Output(outputId = "plt_bag_negative")
         )
       ),
+
       # row 3
       shinydashboard::box(
         title = "Sentiment Analysis (EmoLex)",
-        width = 7,
+        width = 12,
         status = "primary",
         solidHeader = TRUE,
-        collapsible = TRUE,
+        collapsible = FALSE,
+        shinycustomloader::withLoader(
+          loader = spinner_type,
+          plotOutput(outputId = "plt_valence_time")
+          # )
+        ),
+
+        # row 4
+        # shinydashboard::box(
+        #   title = "Sentiment Analysis (EmoLex)",
+        #   width = 7,
+        #   status = "primary",
+        #   solidHeader = TRUE,
+        #   collapsible = TRUE,
         shinycustomloader::withLoader(
           loader = spinner_type,
           plotOutput(outputId = "plt_emotion")
-        )
-      ),
-      shinydashboard::box(
-        title = "Media Sources",
-        width = 5,
-        status = "primary",
-        solidHeader = TRUE,
-        collapsible = TRUE,
+          # )
+        ),
+        # shinydashboard::box(
+        #   title = "Media Sources",
+        #   width = 5,
+        #   status = "primary",
+        #   solidHeader = TRUE,
+        #   collapsible = TRUE,
         shinycustomloader::withLoader(
           loader = spinner_type,
           plotOutput(outputId = "plt_media")
         )
       ),
-      # row 4
+
+      # row 5
       shinydashboard::box(
         title = "News analyzed",
         width = 12,
@@ -133,7 +148,7 @@ ui <- dashboardPage(
     ),
     shiny::conditionalPanel(
       condition = "$('html').hasClass('shiny-busy')",
-      htmltools::tags$div(i18n$t("Loading..."), id = "loadmessage")
+      htmltools::tags$div(i18n$t("Working, please wait..."), id = "loadmessage")
     )
   ),
   footer = shinydashboardPlus::dashboardFooter(left = footerModule$htmlLeft, right = footerModule$htmlRight),

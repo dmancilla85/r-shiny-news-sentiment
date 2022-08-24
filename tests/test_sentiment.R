@@ -6,9 +6,9 @@ lang <- "en"
 
 newsApi <- NewsApi(
   # Language
-  p_from = "2022-04-04",
+  p_from = "2022-07-16",
   # older as one month back (free User)
-  p_to = "2022-04-06",
+  p_to = "2022-07-18",
   p_country = "us",
   p_language = lang,
   # dates surround with "
@@ -18,15 +18,32 @@ newsApi <- NewsApi(
 )
 
 df_req <- getNews(newsApi)
-
+print(df_req)
 nrc <- processWithNRC(df_req, lang)
+print(nrc)
+words <- getWordsWithNRCValences(df_req, lang)
 
-words <- getWordsWithNRCValences(df_req)
+(words)
 
-data <- c("no","data")
-data <- cbind(data,c(1,1))
+aux <- words |> group_by(word) |> summarise(positives=sum(positives), negatives=sum(negatives))
+which(aux$positives==max(aux$positives)) |> length()
+View(aux)
 
+words |> pivot_wider()
 
-wordcloud2(as.data.frame(data),size=1.6, color='random-dark')
+words |>
+  group_by(publishedAt) |>
+  summarise(Positive = sum(positives), Negative=sum(negatives)) |>
+  pivot_longer(c(Positive, Negative), names_to = "Valence", values_to = "Count") |>
+  filter(Count != 0)  |>
+  ggplot(aes(x=publishedAt,y=Count, color=Valence)) + 
+  geom_line(size=1) + 
+  ggtitle("Words Valence in The Time") +
+  theme_dark() 
+
+words |> 
+  group_by(publishedAt) |>
+  summarise(positives = sum(positives)) |>
+  ggplot(aes(x=publishedAt,y=positives)) + geom_line(size=2)
 
 

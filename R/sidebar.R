@@ -1,3 +1,4 @@
+# sidebar.R
 
 showSidebar <- # Sidebar with a slider input for number of bins
   function(i18n) {

@@ -5,10 +5,10 @@ account: el-jaguar
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 5427573
-bundleId: 6100397
+bundleId: 6216746
 url: https://el-jaguar.shinyapps.io/news-sentiment/
-when: 1657867505.32012
-lastSyncTime: 1657867505.32012
+when: 1660887363.35838
+lastSyncTime: 1660887363.35838
 asMultiple: FALSE
 asStatic: FALSE
 ignoredFiles: .dockerignore|.Rbuildignore|.Rprofile|build_and_run_docker.ps1|Dockerfile

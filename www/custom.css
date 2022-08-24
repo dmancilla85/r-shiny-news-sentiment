@@ -60,6 +60,11 @@ div .content-wrapper{
     background-color: #2F2C2C !important;
 }
 
+.fab {
+  margin-left: 2px;
+  margin-right: 2px;
+}
+
 .image-modal {
  height: 100%;
  width: 100%;
@@ -94,6 +99,15 @@ div .content-wrapper{
   font-weight: normal;
   list-style: circle outside;
   font-size: 16px;
+  text-align: left;
+  display: block;
+  padding: 10px 50px;
+}
+
+.modal-foot-text p {
+  font-family: "Lato", sans-serif;
+  font-weight: normal;
+  font-size: 12px;
   text-align: left;
   display: block;
   padding: 10px 50px;

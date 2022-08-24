@@ -1,3 +1,4 @@
+# plots.R
 
 #' Customized palettes'
 dry_rosewood <- c("#745250", "#9a5e5c", "#e7cabf", "#d98288", "#e9a093")
@@ -100,6 +101,10 @@ plotEmolex <- function(plot_data, plot_title, translator) {
   return(plot)
 }
 
+#' Plot Media Sources
+#'
+#' This function plots the number of articles published by each media
+#'
 plotSources <- function(plot_data) {
   sources <- plot_data %>%
     dplyr::select(
@@ -125,7 +130,7 @@ plotSources <- function(plot_data) {
   rose_palette <- rep(dry_rosewood, length.out = number)
 
 
-  title <- stringr::str_to_title("Articles provided by each media")
+  title <- stringr::str_to_title("Articles Published by Each Media")
 
   by_ticks <- 3
 
@@ -187,21 +192,21 @@ plotSentiment <- function(sentiment_data, translator) {
   return(plot)
 }
 
-# wordCloud <- function(df){
-#   set.seed(42)
-#   
-#   aux_df <- df %>%
-#     mutate(angle = 45 * sample(-2:2, n(), replace = TRUE, prob = c(0.5, 0.8, 2, 0.8, 0.5)))
-#   
-#   ggplot(
-#     aux_df,
-#     aes(
-#       label = word, size = freq,
-#       color = factor(sample.int(10, nrow(aux_df), replace = TRUE))
-#     )
-#   ) +
-#     geom_text_wordcloud_area() +
-#     scale_size_area(max_size = 36) +
-#     theme_minimal() +
-#     theme(text=element_text(family="sans")) 
-# }
+#' Plot Valence Timeline
+#'
+#' This function plots the sentiment valence in the time.
+#'
+plotValenceTimeline <- function(words) {
+  aux <- words |>
+    group_by(publishedAt) |>
+    summarise(Positive = sum(positives), Negative = sum(negatives)) |>
+    pivot_longer(c(Positive, Negative), names_to = "Valence", values_to = "Count")
+
+  aux |>
+    ggplot(aes(x = publishedAt, y = Count, color = Valence)) +
+    geom_line(size = 1) +
+    xlab("Publication date") +
+    scale_y_continuous(name = "Words", limits = c(0, max(aux$Count)), breaks = 0:max(aux$Count)) +
+    ggtitle("Words Valence in The Time") +
+    theme_dark()
+}

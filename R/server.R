@@ -1,5 +1,158 @@
 
+# Render Functions
+
+renderEmotionsPlot <- function(values) {
+  shiny::renderPlot({
+    title <- stringr::str_to_title(
+      stringr::str_interp("Emotion on news mentioning '${values$caption_txt}'")
+    )
+    # subtitle <- i18n$t("NRC Sentiment Analysis (EmoLex)")
+
+    if (values$is_empty) {
+      ggplot2::ggplot() +
+        ggplot2::geom_blank()
+    } else {
+      # enable action button
+      shinyjs::enable("btn_start")
+
+      values$nrc |>
+        plotEmolex(plot_title = title, translator = i18n)
+    }
+  })
+}
+
+renderMediaSourcesPlot <- function(values) {
+  shiny::renderPlot({
+    if (values$is_empty) {
+      ggplot2::ggplot() +
+        ggplot2::geom_blank()
+    } else {
+      # show plot
+      values$nrc |>
+        plotSources()
+    }
+  })
+}
+
+renderPositiveWords <- function(values) {
+  wordcloud2::renderWordcloud2({
+    if (values$is_empty) {
+      # do nothing
+    } else {
+      aux <- values$words |>
+        filter(positives != 0) |>
+        select(word, freq = positives) |>
+        group_by(word) |>
+        summarize(freq = sum(freq))
+
+      # this value is used to resize the wordclouds
+      # so all the bigger words can fit in the plot
+      nMax <- which(aux$freq == max(aux$freq)) |> length()
+
+      aux |>
+        wordcloud2a(
+          size = 1 / nMax, color = "random-dark", backgroundColor = "#EADDCA",
+          shape = "diamond"
+        )
+    }
+  })
+}
+
+renderNegativeWords <- function(values) {
+  wordcloud2::renderWordcloud2({
+    if (values$is_empty) {
+      # do nothing
+    } else {
+      aux <- values$words |>
+        filter(negatives != 0) |>
+        select(word, freq = negatives) |>
+        group_by(word) |>
+        summarize(freq = sum(freq))
+
+      # this value is used to resize the wordclouds
+      # so all the bigger words can fit in the plot
+      nMax <- which(aux$freq == max(aux$freq)) |> length()
+
+      aux |>
+        wordcloud2a(
+          size = 1 / nMax, color = "random-dark", backgroundColor = "#EADDCA",
+          shape = "diamond"
+        )
+    }
+  })
+}
+
+renderKeywordBox <- function(values) {
+  renderValueBox({
+    value <- "..."
+
+    if (!values$is_empty) {
+      value <- stringr::str_to_title(values$caption_txt)
+    }
+
+    valueBox(
+      value, "Keyword",
+      icon = icon("wind", lib = "font-awesome"),
+      color = "aqua"
+    )
+  })
+}
+
+renderPositiveBox <- function(values) {
+  renderValueBox({
+    value <- 0.00
+
+    if (!values$is_empty) {
+      value <- format(values$sentiment[2, "percent"] * 100, digits = 4)
+    }
+
+    valueBox(
+      stringr::str_interp("${value}%"), "Positive sentiment",
+      icon = icon("thumbs-up", lib = "font-awesome"),
+      color = "green"
+    )
+  })
+}
+
+renderNegativeBox <- function(values) {
+  renderValueBox({
+    value <- 0.00
+
+    if (!values$is_empty) {
+      value <- format(values$sentiment[1, "percent"] * 100, digits = 4)
+    }
+
+    valueBox(
+      stringr::str_interp("${value}%"), "Negative sentiment",
+      icon = icon("thumbs-down", lib = "font-awesome"),
+      color = "red"
+    )
+  })
+}
+
+renderValenceTimeline <- function(values) {
+  shiny::renderPlot(
+    if (values$is_empty) {
+      ggplot2::ggplot() +
+        ggplot2::geom_blank()
+    } else {
+      # show plot
+      values$words |>
+        plotValenceTimeline()
+    }
+  )
+}
+
+renderFooterCaption <- function() {
+  shiny::renderUI({
+    htmltools::HTML("<p>Sentiment Analisys by David A. Mancilla. 2021</p>")
+  })
+}
+
+############################################################
 # Define server logic
+############################################################
+
 server <- function(input, output, session) {
 
   # show modal
@@ -98,107 +251,28 @@ server <- function(input, output, session) {
     }
   })
 
-  output$plt_emotion <- shiny::renderPlot({
-    title <- stringr::str_to_title(
-      stringr::str_interp("Emotion on news mentioning '${values$caption_txt}'")
-    )
-    # subtitle <- i18n$t("NRC Sentiment Analysis (EmoLex)")
+  output$plt_emotion <- renderEmotionsPlot(values)
 
-    if (values$is_empty) {
-      ggplot2::ggplot() +
-        ggplot2::geom_blank()
-    } else {
-      # enable action button
-      shinyjs::enable("btn_start")
+  output$plt_media <- renderMediaSourcesPlot(values)
 
-      values$nrc %>%
-        plotEmolex(plot_title = title, translator = i18n)
-    }
-  })
+  output$plt_bag_positive <- renderPositiveWords(values)
 
-  output$plt_media <- shiny::renderPlot({
-    if (values$is_empty) {
-      ggplot2::ggplot() +
-        ggplot2::geom_blank()
-    } else {
-      # show plot
-      values$nrc %>%
-        plotSources()
-    }
-  })
+  output$plt_bag_negative <- renderNegativeWords(values)
+  
+  output$plt_valence_time <- renderValenceTimeline(values)
 
-  output$plt_bag_positive <- wordcloud2::renderWordcloud2({
-    if (values$is_empty) {
-      # do nothing
-    } else {
-      values$words %>%
-        filter(positives != 0) %>%
-        select(word, freq = positives) %>%
-        wordcloud2a(size = 1, color = "random-dark", backgroundColor = "#EADDCA", shape = "circle")
-    }
-  })
+  output$box_keyword <- renderKeywordBox(values)
 
-  output$plt_bag_negative <- wordcloud2::renderWordcloud2({
-    if (values$is_empty) {
-      # do nothing
-    } else {
-      values$words %>%
-        filter(negatives != 0) %>%
-        select(word, freq = negatives) %>%
-        wordcloud2a(size = 1, color = "random-dark", backgroundColor = "#EADDCA", shape = "circle")
-    }
-  })
+  output$box_positive <- renderPositiveBox(values)
 
-  output$box_keyword <- renderValueBox({
-    value <- "..."
-
-    if (!values$is_empty) {
-      value <- stringr::str_to_title(values$caption_txt)
-    }
-
-    valueBox(
-      value, "Keyword",
-      icon = icon("wind", lib = "font-awesome"),
-      color = "aqua"
-    )
-  })
-
-  output$box_positive <- renderValueBox({
-    value <- 0.00
-
-    if (!values$is_empty) {
-      value <- format(values$sentiment[2, "percent"] * 100, digits = 4)
-    }
-
-    valueBox(
-      stringr::str_interp("${value}%"), "Positive sentiment",
-      icon = icon("thumbs-up", lib = "font-awesome"),
-      color = "green"
-    )
-  })
-
-  output$box_negative <- renderValueBox({
-    value <- 0.00
-
-    if (!values$is_empty) {
-      value <- format(values$sentiment[1, "percent"] * 100, digits = 4)
-    }
-
-    valueBox(
-      stringr::str_interp("${value}%"), "Negative sentiment",
-      icon = icon("thumbs-down", lib = "font-awesome"),
-      color = "red"
-    )
-  })
+  output$box_negative <- renderNegativeBox(values)
 
   output$tbl_sentiment <- renderNewsTable(values)
 
-  output$txt_caption <- shiny::renderUI({
-    htmltools::HTML("<p>Sentiment Analisys by David A. Mancilla. 2021</p>")
-  })
-  
+  output$txt_caption <- renderFooterCaption()
+
   observeEvent(input$info, {
     # show modal
-    print("show info modal")
+    showModal(modalsModule$welcomeModal())
   })
 }

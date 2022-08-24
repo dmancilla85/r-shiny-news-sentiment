@@ -1,3 +1,6 @@
+# sentiment.R
+# Functions related to sentiment analysis
+
 # syuzhetModule <- modules::module({
 supported_langs <- c(
   "basque",
@@ -150,6 +153,7 @@ getWordsWithNRCValences <- function(df, lang = "es", target = "content") {
   }
 
   language_code <- supported_langs[lang]
+
   df_res <- previousDataCleaning(df)
 
   # Collect all descriptions
@@ -161,10 +165,12 @@ getWordsWithNRCValences <- function(df, lang = "es", target = "content") {
     nrc <- syuzhet::get_nrc_sentiment(word, language = language_code)
     nrc <- nrc %>% dplyr::select(negative, positive)
 
+    publishedAt <- df_res[i, "publishedAt"]
+
     if (i == 1) {
-      nrc_words <- cbind(word, nrc)
+      nrc_words <- cbind(word, nrc, publishedAt)
     } else {
-      nrc_words <- rbind(nrc_words, cbind(word, nrc))
+      nrc_words <- rbind(nrc_words, cbind(word, nrc, publishedAt))
     }
   }
 
@@ -172,7 +178,7 @@ getWordsWithNRCValences <- function(df, lang = "es", target = "content") {
     dplyr::filter(negative != 0 | positive != 0)
 
   df_nrc <- df_nrc %>%
-    group_by(word) %>%
+    group_by(word, publishedAt) %>%
     summarise(
       positives = sum(positive),
       negatives = sum(negative)

@@ -1,4 +1,3 @@
-
 # Render Functions
 
 renderEmotionsPlot <- function(values) {
@@ -6,7 +5,7 @@ renderEmotionsPlot <- function(values) {
     title <- stringr::str_to_title(
       stringr::str_interp("Emotion on news mentioning '${values$caption_txt}'")
     )
-    # subtitle <- i18n$t("NRC Sentiment Analysis (EmoLex)")
+    subtitle <- i18n$t("NRC Sentiment Analysis (EmoLex)")
 
     if (values$is_empty) {
       ggplot2::ggplot() +
@@ -154,6 +153,7 @@ renderFooterCaption <- function() {
 ############################################################
 
 server <- function(input, output, session) {
+  print("Starting server...")
 
   # show modal
   showModal(modalsModule$welcomeModal())
@@ -162,10 +162,12 @@ server <- function(input, output, session) {
     removeModal()
   })
 
-  observeEvent(input$sel_language, {
-    shiny.i18n::update_lang(session, input$sel_language)
-  })
+  # print("Setting language...")
+  # observeEvent(input$sel_language, {
+  #   shiny.i18n::update_lang(session, input$sel_language)
+  # })
 
+  print("Configuring dates...")
   output$dt_fechas <- shiny::renderUI({
     shiny::dateRangeInput(
       inputId = "dt_fechas",
@@ -180,11 +182,11 @@ server <- function(input, output, session) {
     )
   })
 
+  print("Creating reactives...")
   values <- shiny::reactiveValues()
   values$is_empty <- TRUE
 
   shiny::observeEvent(input$btn_start, {
-
     # disable action button
     shinyjs::disable("btn_start")
 
@@ -252,23 +254,14 @@ server <- function(input, output, session) {
   })
 
   output$plt_emotion <- renderEmotionsPlot(values)
-
   output$plt_media <- renderMediaSourcesPlot(values)
-
   output$plt_bag_positive <- renderPositiveWords(values)
-
   output$plt_bag_negative <- renderNegativeWords(values)
-  
   output$plt_valence_time <- renderValenceTimeline(values)
-
   output$box_keyword <- renderKeywordBox(values)
-
   output$box_positive <- renderPositiveBox(values)
-
   output$box_negative <- renderNegativeBox(values)
-
   output$tbl_sentiment <- renderNewsTable(values)
-
   output$txt_caption <- renderFooterCaption()
 
   observeEvent(input$info, {

@@ -23,9 +23,10 @@ nrc <- processWithNRC(df_req, lang)
 print(nrc)
 words <- getWordsWithNRCValences(df_req, lang)
 
-(words)
+print(words)
 
-aux <- words |> group_by(word) |> summarise(positives=sum(positives), negatives=sum(negatives))
+
+aux <- words |> dplyr::group_by(word) |> summarise(positives=sum(positives), negatives=sum(negatives))
 which(aux$positives==max(aux$positives)) |> length()
 View(aux)
 
@@ -37,13 +38,13 @@ words |>
   pivot_longer(c(Positive, Negative), names_to = "Valence", values_to = "Count") |>
   filter(Count != 0)  |>
   ggplot(aes(x=publishedAt,y=Count, color=Valence)) + 
-  geom_line(size=1) + 
+  geom_line(linewidth=1) + 
   ggtitle("Words Valence in The Time") +
   theme_dark() 
 
 words |> 
   group_by(publishedAt) |>
   summarise(positives = sum(positives)) |>
-  ggplot(aes(x=publishedAt,y=positives)) + geom_line(size=2)
+  ggplot(aes(x=publishedAt,y=positives)) + geom_line(linewidth=2)
 
 

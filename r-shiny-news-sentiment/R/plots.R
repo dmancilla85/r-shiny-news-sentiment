@@ -121,7 +121,7 @@ plotSources <- function(plot_data) {
     panel.background = element_blank()
   )
 
-  data <- sources %>% dplyr::count(source.name, name = "count")
+  data <- sources %>% count(source.name, name = "count")
   data$source.name <- as.factor(data$source.name)
   # count the needed levels of a factor
   number <- nlevels(data$source.name)
@@ -198,15 +198,15 @@ plotSentiment <- function(sentiment_data, translator) {
 #'
 plotValenceTimeline <- function(words) {
   aux <- words |>
-    ggplot2::group_by(publishedAt) |>
-      dplyr::summarise(Positive = sum(positives), Negative = sum(negatives)) |>
-      dplyr::pivot_longer(c(Positive, Negative), names_to = "Valence", values_to = "Count")
+    group_by(publishedAt) |>
+    summarise(Positive = sum(positives), Negative = sum(negatives)) |>
+    pivot_longer(c(Positive, Negative), names_to = "Valence", values_to = "Count")
 
   aux |>
-    ggplot2::ggplot(aes(x = publishedAt, y = Count, color = Valence)) +
-    ggplot2::geom_line(linewidth = 1) +
-    ggplot2::xlab("Publication date") +
-    ggplot2::scale_y_continuous(name = "Words", limits = c(0, max(aux$Count)), breaks = 0:max(aux$Count)) +
-    ggplot2::ggtitle("Words Valence in The Time") +
-    ggplot2::theme_dark()
+    ggplot(aes(x = publishedAt, y = Count, color = Valence)) +
+    geom_line(size = 1) +
+    xlab("Publication date") +
+    scale_y_continuous(name = "Words", limits = c(0, max(aux$Count)), breaks = 0:max(aux$Count)) +
+    ggtitle("Words Valence in The Time") +
+    theme_dark()
 }

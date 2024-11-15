@@ -155,14 +155,11 @@ renderFooterCaption <- function() {
 server <- function(input, output, session) {
   print("Starting server...")
 
-  # TODO bslib::bs_themer()
-
   # show modal
-  # TODO shiny::showModal(modalsModule$welcomeModal())
-  
+  showModal(modalsModule$welcomeModal())
 
-  shiny::observeEvent(input$close_modal, {
-    shiny::removeModal()
+  observeEvent(input$close_modal, {
+    removeModal()
   })
 
   # print("Setting language...")
@@ -173,7 +170,7 @@ server <- function(input, output, session) {
   print("Configuring dates...")
   output$dt_fechas <- shiny::renderUI({
     shiny::dateRangeInput(
-      inputId = "dt_date_input",
+      inputId = "dt_fechas",
       label = i18n$t("Date range:"),
       min = Sys.Date() - 3,
       start = Sys.Date() - 3,
@@ -193,7 +190,7 @@ server <- function(input, output, session) {
     # disable action button
     shinyjs::disable("btn_start")
 
-    values$date_range <- shiny::isolate(input$dt_date_input)
+    values$date_range <- shiny::isolate(input$dt_fechas)
     values$caption_txt <- shiny::isolate(input$txt_caption)
     values$country <- shiny::isolate(input$sel_country)
     values$lang <- shiny::isolate(input$sel_language)

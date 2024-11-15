@@ -37,10 +37,10 @@ ui <- dashboardPage(
       )
     ),
     # Spinner
-    #shinybusy::add_busy_spinner(
-    #  spin = "semipolar", height = "200px", position = "bottom-right",
-    #  width = "200px", margins = c(40, 40)
-    #),
+    shinybusy::add_busy_spinner(
+      spin = "semipolar", height = "200px",
+      width = "200px", margins = c(40, 40), color = "#fff"
+    ),
     # Tooltips
     shinyBS::bsTooltip("sel_language", "Language of the news",
       "right",
@@ -106,6 +106,7 @@ ui <- dashboardPage(
         shinycustomloader::withLoader(
           loader = spinner_type,
           plotOutput(outputId = "plt_valence_time")
+          # )
         ),
 
         # row 4

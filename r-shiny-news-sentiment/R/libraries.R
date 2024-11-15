@@ -7,12 +7,6 @@
 loadAllLibraries <- function() {
   print("Loading libraries...")
 
-  # Shiny framework
-  if (!require(shiny)) {
-    install.packages("shiny")
-    library(shiny)
-  }
-  
   if (!require(shinyjs)) {
     install.packages("shinyjs")
     library(shinyjs)
@@ -79,6 +73,12 @@ loadAllLibraries <- function() {
     library(syuzhet)
   }
 
+  # Shiny framework
+  if (!require(shiny)) {
+    install.packages("shiny")
+    library(shiny)
+  }
+
   # Sentiment Analysis
   if (!require(shinycustomloader)) {
     install.packages("shinycustomloader")
@@ -131,16 +131,5 @@ loadAllLibraries <- function() {
     install.packages("urltools")
     library(urltools)
   }
-
-  if (!require(bslib)) {
-    install.packages("bslib")
-    library(bslib)
-  }
-
-  if (!require(bsicons)) {
-    install.packages("bslib")
-    library(bsicons)
-  }
-
   print("Load finished.")
 }
